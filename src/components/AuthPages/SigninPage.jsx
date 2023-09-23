@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import { Link as RouterLink, useNavigate } from "react-router-dom"; // Import useHistory
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
+import { toast } from 'react-toastify';
 import Typography from "@mui/material/Typography";
 import { Container } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
@@ -14,19 +15,18 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import './SigninPage.css';
 import loginlogo from "../../Assets/login-logo.png";
-import Alert from '@mui/material/Alert';
 import { openDB } from 'idb';
 import bcrypt from 'bcryptjs';
 import { useAuth } from "./useAuth";
+
 export default function SigninPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-
   const [showPassword, setShowPassword] = useState(false);
-  const [alert, setAlert] = useState(null);
+
   const { login } = useAuth();
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -45,9 +45,26 @@ export default function SigninPage() {
 
     if (user && (await bcrypt.compare(formData.password, user.password))) {
       login()
+      toast.success('Signed In successfully!!', {
+        position: 'top-right',
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: 'colored',
+      });
       navigate('/products');
     } else {
-      setAlert(<Alert severity="error">Invalid email or password!</Alert>);
+      toast.error('Invalid e-mail or password!!', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: 'colored',
+      });
     }
   };
 
@@ -101,7 +118,6 @@ export default function SigninPage() {
                 onSubmit={handleSubmit}
                 sx={{ mt: 1 }}
               >
-                {alert}
                 <TextField
                   margin="normal"
                   required
@@ -147,7 +163,6 @@ export default function SigninPage() {
                   fullWidth
                   variant="contained"
                   sx={{ mt: 3, mb: 2, bgcolor: '#ffbb02', color: 'black' }}
-                  onSubmit={handleSubmit}
                 >
                   Sign In
                 </Button>

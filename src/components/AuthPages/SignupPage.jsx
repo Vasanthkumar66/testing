@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
+import { toast } from 'react-toastify';
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -11,12 +12,11 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { openDB } from 'idb';
 import bcrypt from 'bcryptjs';
 import loginlogo from "../../Assets/login-logo.png";
 import './SignupPage.css';
-import Alert from '@mui/material/Alert';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -26,9 +26,8 @@ export default function SignupPage() {
     confirmPassword: '',
     country: '',
   });
-
   const [showPassword, setShowPassword] = useState(false);
-  const [alert, setAlert] = useState(null);
+  const navigate = useNavigate();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -41,32 +40,79 @@ export default function SignupPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      setAlert(<Alert severity="error">Password and Confirm Password do not match!</Alert>);
-      return;
-    }
-    const hashedPassword = await bcrypt.hash(formData.password, 10);
-    const newUser = {
-      username: formData.username,
-      email: formData.email,
-      password: hashedPassword,
-      country: formData.country,
-    };
 
-    const db = await openDB('GroceryDB', 1);
-    const userExists = await db.get('users', formData.email);
+    try {
+      const db = await openDB('GroceryDB', 1, {
+        upgrade(db) {
+          if (!db.objectStoreNames.contains('users')) {
+            db.createObjectStore('users', { keyPath: 'email' });
+          }
+        },
+      });
 
-    if (userExists) {
-      setAlert(<Alert severity="warning">User with this email already exists!</Alert>);
-    } else {
-      await db.put('users', newUser);
-      setAlert(<Alert severity="success">User Created Successfully!</Alert>);
-      setFormData({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        country: '',
+      if (formData.password !== formData.confirmPassword) {
+        toast.warning('Password and Confirm password do not match', {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: 'colored',
+        });
+        return;
+      }
+
+      const hashedPassword = await bcrypt.hash(formData.password, 10);
+      const newUser = {
+        username: formData.username,
+        email: formData.email,
+        password: hashedPassword,
+        country: formData.country,
+      };
+
+      const userExists = await db.get('users', formData.email);
+
+      if (userExists) {
+        toast.warning('User with this e-mail already exists!!', {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: 'colored',
+        });
+      } else {
+        await db.put('users', newUser);
+        toast.success('User created successfully!!', {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: 'colored',
+        });
+        setFormData({
+          username: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          country: '',
+        });
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('An error occured while processing your request', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: 'colored',
       });
     }
   };
@@ -121,7 +167,6 @@ export default function SignupPage() {
                 onSubmit={handleSubmit}
                 sx={{ mt: 1 }}
               >
-                {alert}
                 <TextField
                   margin="normal"
                   required

@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import InputBase from '@mui/material/InputBase';
 import { styled, alpha } from '@mui/material/styles';
-import logo from './header.png';
+import logo from '../Headers/header.png';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonIcon from '@mui/icons-material/Person';
 import SearchIcon from '@mui/icons-material/Search';
@@ -88,6 +88,7 @@ export default function Header() {
   const handleSearch = () => {
     // Handle the search query here, e.g., perform a search or update state.
     console.log(`Searching for: ${searchInput}`);
+    // You can also call the handleSearch function from Products.jsx if needed.
   };
 
   const handleInputChange = (event) => {
@@ -105,10 +106,7 @@ export default function Header() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" sx={{ backgroundColor: 'black', height: '100px' }}>
         <Toolbar sx={{ display: 'flex', marginTop: 'auto', marginBottom: 'auto', alignItems: 'center' }}>
-          <img src={logo} style={{ width: "120px" }} alt="Logo" />
-          <Typography variant="h7" component="div" sx={{ flexGrow: 1, fontFamily: 'unset', color: 'grey' }}>
-            {typedText}
-          </Typography>
+        <img src={logo} style={{ width: "120px" }} alt="Logo" />
           <Search>
             <SearchIconWrapper>
               <SearchIcon sx={{ color: '#eeb03d' }} />

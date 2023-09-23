@@ -5,3 +5,18 @@
   height: 100vh; 
 }
 
+/* Add this CSS to your stylesheet or a separate CSS file */
+.floating-alert {
+  position: fixed; /* Fixes the position relative to the viewport */
+  top: 20px; /* Adjust the top distance as needed */
+  right: 20px; /* Adjust the right distance as needed */
+  z-index: 1000; /* Ensures the alert appears above other content */
+  background-color: #fff; /* Background color of the alert */
+  border: 1px solid #ccc; /* Border for the alert */
+  padding: 10px; /* Padding inside the alert */
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); /* Box shadow for a subtle effect */
+  border-radius: 5px; /* Rounded corners for the alert */
+  max-width: 300px; /* Adjust the maximum width as needed */
+}
+
+/* You can define additional styles for different types of alerts */

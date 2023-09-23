@@ -2,7 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import AppBar from '@mui/material/AppBar';
 import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
 import { openDB } from 'idb';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -13,9 +16,8 @@ import InputBase from '@mui/material/InputBase';
 import { styled, alpha } from '@mui/material/styles';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import SearchIcon from '@mui/icons-material/Search';
-import logo from '../HomePage/Headers/header.png'
-import './Products.css';
-import { useNavigate } from 'react-router-dom';
+import logo from '../HomePage/Headers/header.png';
+import './CartPage.css';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -56,48 +58,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, removeFromCart }) => {
   const { id, title, price, description, images } = product;
-  const [cart, setCart] = useState([]);
 
- 
-  const addToCart = async (product) => {
-    try {
-      const db = await openDB('GroceryDB2', 1, {
-        upgrade(db) {
-          if (!db.objectStoreNames.contains('carts')) {
-            db.createObjectStore('carts', { keyPath: 'email' });
-          }
-        },
-      });
-      const transaction = db.transaction("carts", "readwrite"); // Use "cart" here
-      const cartStore = transaction.objectStore("carts"); // Use "cart" here
-      cartStore.add(product);
-      transaction.oncomplete = () => {
-        toast.info(`${product.title} added to the cart 😉`, {
-          position: 'top-right',
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: 'colored',
-        });
-      };
-    } catch (error) {
-      toast.error(`😥 Could not add ${product.title} to the cart`, {
-        position: 'top-right',
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'colored',
-      });
-    }
-  };
   return (
     <Card
       className="product-card"
@@ -143,8 +106,11 @@ const ProductCard = ({ product }) => {
           <div className="product-rating">
             {generateStars(3)}
           </div>
-          <IconButton onClick={() => addToCart(product)} sx={{ color: 'black', marginLeft: '70px' }}>
-            <ShoppingCartIcon />
+          <IconButton
+            onClick={() => removeFromCart(id)}
+            sx={{ color: 'black', marginLeft: '70px' }}
+          >
+            <RemoveShoppingCartIcon />
           </IconButton>
         </div>
       </CardContent>
@@ -152,31 +118,30 @@ const ProductCard = ({ product }) => {
   );
 };
 
-
 const generateStars = (rating) => {
-    const maxStars = 5;
-    const starIcons = [];
-    for (let i = 0; i < maxStars; i++) {
-      if (i < rating) {
-        starIcons.push(<span key={i} className="star-icon gold">&#9733;</span>);
-      } else {
-        starIcons.push(<span key={i} className="star-icon gold">&#9734;</span>);
-      }
+  const maxStars = 5;
+  const starIcons = [];
+  for (let i = 0; i < maxStars; i++) {
+    if (i < rating) {
+      starIcons.push(<span key={i} className="star-icon gold">&#9733;</span>);
+    } else {
+      starIcons.push(<span key={i} className="star-icon gold">&#9734;</span>);
     }
-    return starIcons;
-  };
+  }
+  return starIcons;
+};
 
-const Products = () => {
-  const [typedText, setTypedText] = useState('');
-  const fullText = "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
-  const delay = 75;
-  const [effVar, setEffVar] = useState(true);
-  const [searchInput, setSearchInput] = useState('');
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [showNoMatchCard, setShowNoMatchCard] = useState(false);
-  const noMatchCardRef = useRef(null);
-  const navigate = useNavigate()
+const CartPage = () => {
+    const [typedText, setTypedText] = useState('');
+    const fullText = "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
+    const delay = 75;
+    const [effVar, setEffVar] = useState(true);
+    const [searchInput, setSearchInput] = useState('');
+    const [cart, setCart] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]); // Add this line
+    const [showNoMatchCard, setShowNoMatchCard] = useState(false); // Add this line
+    const noMatchCardRef = useRef(null);
+
   useEffect(() => {
     let currentIndex = 0;
     const typingInterval = setInterval(() => {
@@ -202,55 +167,82 @@ const Products = () => {
   }, []);
 
   useEffect(() => {
-    fetch('https://api.escuelajs.co/api/v1/products')
-      .then((response) => response.json())
-      .then((data) => {
-        setProducts(data);
-        setFilteredProducts(data);
-      })
-      .catch((error) => console.error('Error fetching data:', error));
+    // Open the IndexedDB database and fetch the cart items.
+    const fetchCartItems = async () => {
+      try {
+        const db = await openDB('GroceryDB2', 1);
+        const transaction = db.transaction('carts', 'readonly');
+        const cartStore = transaction.objectStore('carts');
+        const cartItems = await cartStore.getAll();
+        setCart(cartItems);
+      } catch (error) {
+        console.error('Error fetching cart items:', error);
+      }
+    };
+
+    fetchCartItems();
   }, []);
+
+  const removeFromCart = async (productId) => {
+    try {
+      const db = await openDB('GroceryDB2', 1);
+      const transaction = db.transaction('carts', 'readwrite');
+      const cartStore = transaction.objectStore('carts');
+      await cartStore.delete(productId);
+      setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
+      toast.info(`Item removed from the cart 🙂`, {
+        position: 'top-right',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'colored',
+      });
+    } catch (error) {
+      console.error('Error removing item from cart:', error);
+    }
+  };
 
   const handleSearch = () => {
     if (searchInput.trim() === '') {
-      setFilteredProducts(products);
+      // If the search input is empty, display all cart items.
+      setFilteredProducts(cart);
       setShowNoMatchCard(false);
     } else {
-      const filtered = products.filter((product) =>
+      // Filter cart items based on the search input.
+      const filtered = cart.filter((product) =>
         product.title.toLowerCase().includes(searchInput.toLowerCase())
       );
       setFilteredProducts(filtered);
       setShowNoMatchCard(filtered.length === 0);
     }
 
-if (filteredProducts.length > 0) {
-    const firstMatchedProduct = document.querySelector('.product-card');
-    if (firstMatchedProduct) {
-      firstMatchedProduct.scrollIntoView({ behavior: 'smooth' });
+    if (filteredProducts.length > 0) {
+      const firstMatchedProduct = document.querySelector('.product-card');
+      if (firstMatchedProduct) {
+        firstMatchedProduct.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else if (noMatchCardRef.current) {
+      noMatchCardRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  } else if (noMatchCardRef.current) {
-    noMatchCardRef.current.scrollIntoView({ behavior: 'smooth' });
-  }
   };
+
   const handleInputChange = (event) => {
     const query = event.target.value;
     setSearchInput(query);
     setTimeout(() => {
-        handleSearch()
+      handleSearch();
     }, 1000);
   };
-
-  const handleCartClick = () =>
-  {
-    navigate('/cart-page')
-  }
 
   return (
     <div>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static" sx={{ backgroundColor: 'black', height: '100px' }}>
           <Toolbar sx={{ display: 'flex', marginTop: 'auto', marginBottom: 'auto', alignItems: 'center' }}>
-          <img src={logo} style={{ width: "120px" }} alt="Logo" />
+            <img src={logo} style={{ width: "120px" }} alt="Logo" />
             <Typography variant="h7" component="div" sx={{ flexGrow: 1, fontFamily: 'unset', color: 'grey' }}>
               <span className='head-title'>{typedText}</span>
             </Typography>
@@ -262,49 +254,55 @@ if (filteredProducts.length > 0) {
                 placeholder="Search for products..."
                 inputProps={{ 'aria-label': 'search' }}
                 onChange={handleInputChange}
-                value={searchInput}/>
+                value={searchInput}
+              />
             </Search>
-            <IconButton sx={{ color: '#eeb03d' }} onClick={handleCartClick}>
-            <ShoppingCartIcon />
-            </IconButton>
+            <Link to="/products" style={{ textDecoration: 'none' }}>
+              <Button className="button" sx={{ color: 'black', backgroundColor: '#eeb03d', marginLeft: '13px' }}>
+                <ShoppingCartIcon />
+                <Typography variant="body2" sx={{ paddingLeft: '8px' }}>Go to Grocery</Typography>
+              </Button>
+            </Link>
           </Toolbar>
         </AppBar>
       </Box>
-<Typography
-  variant="h4"
-  sx={{
-    fontFamily: 'fantasy',
-    backgroundImage: 'linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)',
-    WebkitBackgroundClip: 'text',
-    color: 'transparent',
-    marginBottom: '5px',
-    marginTop: '20px',
-    textAlign: 'center',
-    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)', // Add a shadow here
-  }}>
-  Our Products
-</Typography>
+      <Typography
+        variant="h4"
+        sx={{
+          fontFamily: 'fantasy',
+          backgroundImage: 'linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)',
+          WebkitBackgroundClip: 'text',
+          color: 'transparent',
+          marginBottom: '5px',
+          marginTop: '20px',
+          textAlign: 'center',
+          textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)',
+        }}
+      >
+        Your Cart
+      </Typography>
       <div className="centered-container">
         <div className="product-card-container">
-        {filteredProducts.slice(1, filteredProducts.length - 1).map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {cart.map((product) => (
+            <ProductCard key={product.id} product={product} removeFromCart={removeFromCart} />
           ))}
         </div>
         {showNoMatchCard && (
           <Card
-          ref={noMatchCardRef}
-          className="product-card no-match-card"
-          sx={{ width: '100%', padding: '2rem' }}>
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div" className="product-title">
-              No Items matched your Search !!
-            </Typography>
-          </CardContent>
-        </Card>
+            ref={noMatchCardRef}
+            className="product-card no-match-card"
+            sx={{ width: '100%', padding: '2rem' }}
+          >
+            <CardContent>
+              <Typography gutterBottom variant="h5" component="div" className="product-title">
+                No Items matched your Search !!
+              </Typography>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
   );
 };
 
-export default Products;
+export default CartPage;
