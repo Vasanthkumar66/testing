@@ -1,0 +1,11 @@
+/* Carousel.css */
+.img {
+    max-width: 100%; /* Ensure the image's maximum width is 100% of its container */
+    height: auto; /* Automatically adjust the height to maintain the image's aspect ratio */
+  }
+
+.image-slideshow {
+    overflow: hidden; /* Hide overflow to remove the extra white space */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margin */
+  }
