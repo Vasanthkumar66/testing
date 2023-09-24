@@ -23,7 +23,10 @@ const HomePage = ({setAlert}) => {
           <Route path="/cart-page" element={<CartPage/>} />
           </>
         ) : (
+          <>
           <Route path="/products" element={<Navigate to="/login" />} />
+          <Route path="/cart-page" element={<Navigate to="/login" />} />
+          </>
         )}
       </Routes>
     </Router>

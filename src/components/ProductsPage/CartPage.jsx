@@ -6,7 +6,6 @@ import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
-import { openDB } from 'idb';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
@@ -173,41 +172,32 @@ const CartPage = () => {
   }, []);
 
   useEffect(() => {
-    const fetchCartItems = async () => {
-      try {
-        const db = await openDB('GroceryDB2', 1);
-        const transaction = db.transaction('carts', 'readonly');
-        const cartStore = transaction.objectStore('carts');
-        const cartItems = await cartStore.getAll();
-        setCart(cartItems);
-      } catch (error) {
-        console.error('Error fetching cart items:', error);
-      }
-    };
-
-    fetchCartItems();
+    // Retrieve cart data from local storage on component mount
+    const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
+    setCart(storedCart);
   }, []);
 
-  const removeFromCart = async (productId) => {
-    try {
-      const db = await openDB('GroceryDB2', 1);
-      const transaction = db.transaction('carts', 'readwrite');
-      const cartStore = transaction.objectStore('carts');
-      await cartStore.delete(productId);
-      setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
-      toast.info(`Item removed from the cart 🙂`, {
-        position: 'top-right',
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'colored',
-      });
-    } catch (error) {
-      console.error('Error removing item from cart:', error);
-    }
+  const removeFromCart = (productId) => {
+    // Remove the product from the cart in state
+    const updatedCart = cart.filter((product) => product.id !== productId);
+    setCart(updatedCart);
+
+    // Remove the product from local storage
+    const updatedLocalStorageCart = cart.filter(
+      (product) => product.id !== productId
+    );
+    localStorage.setItem('cart', JSON.stringify(updatedLocalStorageCart));
+
+    toast.info(`Item removed from the cart 🙂`, {
+      position: 'top-right',
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'colored',
+    });
   };
 
   const handleSearch = () => {
@@ -283,7 +273,7 @@ const CartPage = () => {
           </Toolbar>
         </AppBar>
       </Box>
-      {cart.length>=1 ? <Typography
+      {cart.length >= 1 ? <Typography
     variant="h4"
     sx={{
       fontFamily: 'fantasy',
@@ -312,22 +302,45 @@ const CartPage = () => {
   </Typography>}
       <div className="centered-container">
         <div className="product-card-container">
-          {cart.length>=1 ? cart.map((product) => (
+          {cart.length >= 1 ? cart.map((product) => (
             <ProductCard key={product.id} product={product} removeFromCart={removeFromCart} />
-          )) :   <div><img src={emptycart}/></div>}
+          )) :   <div className='mt-image'><img src={emptycart} alt="Empty Cart"/></div>}
         </div>
         {showNoMatchCard && (
           <Card
-            ref={noMatchCardRef}
-            className="product-card no-match-card"
-            sx={{ width: '100%', padding: '2rem' }}
-          >
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="div" className="product-title">
-                No Items matched your Search !!
-              </Typography>
-            </CardContent>
-          </Card>
+          ref={noMatchCardRef}
+          className="product-card no-match-card"
+          sx={{
+            width: "100%",
+            padding: "2rem",
+            background: "linear-gradient(to right, rgba(238, 176, 61, 0.5), rgba(194, 118, 63, 0.5), rgba(135, 72, 57, 0.5), rgba(69, 37, 39, 0.5), rgba(0, 0, 0, 0.5))",
+            color: "#fff",
+            borderRadius: "8px",
+            boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.3)", /* Increased box shadow */
+            animation: "fadeIn 1s ease-in-out",
+          }}
+         >
+          <CardContent>
+            <Typography
+              gutterBottom
+              variant="h5"
+              component="div"
+              className="product-title"
+              sx={{
+                fontFamily: "monospace",
+                fontSize: "24px", /* Increased text size */
+                textAlign: "center",
+                opacity: 0,
+                animation: "fadeInText 3s ease-in-out forwards",
+                textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)", /* Added text shadow */
+                color: "black", /* Changed font color for contrast */
+                WebkitTextStroke: "0.5px black", /* Added glow effect */
+              }}
+            >
+              No Items matched your Search !! 😔🔍
+            </Typography>
+          </CardContent>
+         </Card>
         )}
       </div>
     </div>

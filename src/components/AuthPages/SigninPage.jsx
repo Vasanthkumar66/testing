@@ -6,28 +6,28 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import Typography from "@mui/material/Typography";
 import { Container } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import './SigninPage.css';
+import "./SigninPage.css";
 import loginlogo from "../../Assets/login-logo.png";
-import { openDB } from 'idb';
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 import { useAuth } from "./useAuth";
 
 export default function SigninPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
 
   const { login } = useAuth();
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
@@ -40,37 +40,55 @@ export default function SigninPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const db = await openDB('GroceryDB', 1);
-    const user = await db.get('users', formData.email);
+    try {
+      // Retrieve user data from local storage
+      const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+      const user = storedUsers.find((u) => u.email === formData.email);
 
-    if (user && (await bcrypt.compare(formData.password, user.password))) {
-      login()
-      toast.success('Signed In successfully!!', {
-        position: 'top-right',
-        autoClose: 2500,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        theme: 'colored',
-      });
-      navigate('/products');
-    } else {
-      toast.error('Invalid e-mail or password!!', {
-        position: 'top-right',
+      if (user && (await bcrypt.compare(formData.password, user.password))) {
+        login();
+        toast.success("Signed In successfully!!", {
+          position: "top-right",
+          autoClose: 2500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          theme: "colored",
+        });
+        navigate("/products");
+      } else {
+        toast.error("Invalid e-mail or password!!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("An error occurred while processing your request", {
+        position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        theme: 'colored',
+        theme: "colored",
       });
     }
   };
 
   return (
     <div className="login-page">
-      <Container component="main" maxWidth="lg" className="container">
+      <Container
+        component="main"
+        maxWidth="lg"
+        className="container"
+      >
         <Grid container>
           <CssBaseline />
           <Grid
@@ -162,14 +180,19 @@ export default function SigninPage() {
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{ mt: 3, mb: 2, bgcolor: '#ffbb02', color: 'black' }}
+                  sx={{ mt: 3, mb: 2, bgcolor: "#ffbb02", color: "black" }}
                 >
                   Sign In
                 </Button>
                 <Grid container>
                   <Grid item>
-                    <RouterLink to="/signup" style={{ textDecoration: 'none' }}>
-                      <Typography variant="body2" sx={{ paddingLeft: '8px' }}><u>{"Don't have an account? Sign Up"}</u></Typography>
+                    <RouterLink
+                      to="/signup"
+                      style={{ textDecoration: "none" }}
+                    >
+                      <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
+                        <u>{"Don't have an account? Sign Up"}</u>
+                      </Typography>
                     </RouterLink>
                   </Grid>
                 </Grid>

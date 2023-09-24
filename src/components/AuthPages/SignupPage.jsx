@@ -13,7 +13,6 @@ import InputAdornment from "@mui/material/InputAdornment";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import { openDB } from 'idb';
 import bcrypt from 'bcryptjs';
 import loginlogo from "../../Assets/login-logo.png";
 import './SignupPage.css';
@@ -42,14 +41,6 @@ export default function SignupPage() {
     event.preventDefault();
 
     try {
-      const db = await openDB('GroceryDB', 1, {
-        upgrade(db) {
-          if (!db.objectStoreNames.contains('users')) {
-            db.createObjectStore('users', { keyPath: 'email' });
-          }
-        },
-      });
-
       if (formData.password !== formData.confirmPassword) {
         toast.warning('Password and Confirm password do not match', {
           position: 'top-right',
@@ -71,7 +62,9 @@ export default function SignupPage() {
         country: formData.country,
       };
 
-      const userExists = await db.get('users', formData.email);
+      // Check if the user already exists in local storage
+      const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+      const userExists = storedUsers.find((user) => user.email === formData.email);
 
       if (userExists) {
         toast.warning('User with this e-mail already exists!!', {
@@ -84,7 +77,10 @@ export default function SignupPage() {
           theme: 'colored',
         });
       } else {
-        await db.put('users', newUser);
+        // Add the new user to local storage
+        storedUsers.push(newUser);
+        localStorage.setItem('users', JSON.stringify(storedUsers));
+
         toast.success('User created successfully!!', {
           position: 'top-right',
           autoClose: 3000,
@@ -105,7 +101,7 @@ export default function SignupPage() {
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error('An error occured while processing your request', {
+      toast.error('An error occurred while processing your request', {
         position: 'top-right',
         autoClose: 3000,
         hideProgressBar: false,

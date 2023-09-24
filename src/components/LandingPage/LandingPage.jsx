@@ -398,23 +398,41 @@ const LandingPage = () => {
               ))}
           </div>
           {showNoMatchCard && (
-            <Card
-              ref={noMatchCardRef}
-              className="product-card no-match-card"
-              sx={{ width: "100%", padding: "2rem" }}
-            >
-              <CardContent>
-                <Typography
-                  gutterBottom
-                  variant="h5"
-                  component="div"
-                  className="product-title"
-                >
-                  No Items matched your Search !!
-                </Typography>
-              </CardContent>
-            </Card>
-          )}
+ <Card
+ ref={noMatchCardRef}
+ className="product-card no-match-card"
+ sx={{
+   width: "100%",
+   padding: "2rem",
+   background: "linear-gradient(to right, rgba(238, 176, 61, 0.5), rgba(194, 118, 63, 0.5), rgba(135, 72, 57, 0.5), rgba(69, 37, 39, 0.5), rgba(0, 0, 0, 0.5))",
+   color: "#fff",
+   borderRadius: "8px",
+   boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.3)", /* Increased box shadow */
+   animation: "fadeIn 1s ease-in-out",
+ }}
+>
+ <CardContent>
+   <Typography
+     gutterBottom
+     variant="h5"
+     component="div"
+     className="product-title"
+     sx={{
+       fontFamily: "monospace",
+       fontSize: "24px", /* Increased text size */
+       textAlign: "center",
+       opacity: 0,
+       animation: "fadeInText 3s ease-in-out forwards",
+       textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)", /* Added text shadow */
+       color: "black", /* Changed font color for contrast */
+       WebkitTextStroke: "0.5px black", /* Added glow effect */
+     }}
+   >
+     No Items matched your Search !! 😔🔍
+   </Typography>
+ </CardContent>
+</Card>
+)}
         </div>
       </Link>
     </div>

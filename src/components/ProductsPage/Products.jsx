@@ -4,7 +4,6 @@ import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import { toast } from "react-toastify";
 import { useAuth } from "../AuthPages/useAuth";
-import { openDB } from "idb";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
@@ -63,47 +62,28 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, cart, setCart }) => {
   const { id, title, price, description, images } = product;
-  const [cart, setCart] = useState([]);
 
-  const addToCart = async (product) => {
-    try {
-      const db = await openDB("GroceryDB2", 1, {
-        upgrade(db) {
-          if (!db.objectStoreNames.contains("carts")) {
-            db.createObjectStore("carts", { keyPath: "email" });
-          }
-        },
-      });
-      const transaction = db.transaction("carts", "readwrite"); // Use "cart" here
-      const cartStore = transaction.objectStore("carts"); // Use "cart" here
-      cartStore.add(product);
-      transaction.oncomplete = () => {
-        toast.info(`${product.title} added to the cart 😉`, {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
-      };
-    } catch (error) {
-      toast.error(`😥 Could not add ${product.title} to the cart`, {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-      });
-    }
+  const addToCart = (product) => {
+    // Add product to the cart state
+    setCart([...cart, product]);
+
+    // Save the updated cart state to local storage
+    localStorage.setItem("cart", JSON.stringify([...cart, product]));
+
+    toast.info(`${product.title} added to the cart 😉`, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
   };
+
   return (
     <Card
       className="product-card"
@@ -209,31 +189,13 @@ const Products = () => {
   const noMatchCardRef = useRef(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
-  useEffect(() => {
-    let currentIndex = 0;
-    const typingInterval = setInterval(() => {
-      if (currentIndex <= fullText.length) {
-        setTypedText(fullText.substring(0, currentIndex));
-        currentIndex++;
-      } else {
-        clearInterval(typingInterval);
-      }
-    }, delay);
-    return () => {
-      clearInterval(typingInterval);
-    };
-  }, [effVar]);
+  const [cart, setCart] = useState([]);
 
   useEffect(() => {
-    const toggleInterval = setInterval(() => {
-      setEffVar((prevEffVar) => !prevEffVar);
-    }, 15000);
-    return () => {
-      clearInterval(toggleInterval);
-    };
-  }, []);
+    // Retrieve cart data from local storage on component mount
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCart(storedCart);
 
-  useEffect(() => {
     fetch("https://api.escuelajs.co/api/v1/products")
       .then((response) => response.json())
       .then((data) => {
@@ -292,7 +254,7 @@ const Products = () => {
             }}
           >
             <Link to="/" style={{ textDecoration: "none" }}>
-              <img src={logo} style={{ width: "120px" }} alt="Logo" />         
+              <img src={logo} style={{ width: "120px" }} alt="Logo" />
             </Link>
             <Typography
               variant="h7"
@@ -390,25 +352,48 @@ const Products = () => {
           {filteredProducts
             .slice(1, filteredProducts.length - 1)
             .map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                cart={cart}
+                setCart={setCart}
+              />
             ))}
         </div>
         {showNoMatchCard && (
-          <Card
-            ref={noMatchCardRef}
-            className="product-card no-match-card"
-            sx={{ width: "100%", padding: "2rem" }}
+           <Card
+           ref={noMatchCardRef}
+           className="product-card no-match-card"
+           sx={{
+             width: "100%",
+             padding: "2rem",
+             background: "linear-gradient(to right, rgba(238, 176, 61, 0.5), rgba(194, 118, 63, 0.5), rgba(135, 72, 57, 0.5), rgba(69, 37, 39, 0.5), rgba(0, 0, 0, 0.5))",
+             color: "#fff",
+             borderRadius: "8px",
+             boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.3)", /* Increased box shadow */
+             animation: "fadeIn 1s ease-in-out",
+           }}
           >
-            <CardContent>
-              <Typography
-                gutterBottom
-                variant="h5"
-                component="div"
-                className="product-title"
-              >
-                No Items matched your Search !!
-              </Typography>
-            </CardContent>
+           <CardContent>
+             <Typography
+               gutterBottom
+               variant="h5"
+               component="div"
+               className="product-title"
+               sx={{
+                 fontFamily: "monospace",
+                 fontSize: "24px", /* Increased text size */
+                 textAlign: "center",
+                 opacity: 0,
+                 animation: "fadeInText 3s ease-in-out forwards",
+                 textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)", /* Added text shadow */
+                 color: "black", /* Changed font color for contrast */
+                 WebkitTextStroke: "0.5px black", /* Added glow effect */
+               }}
+             >
+               No Items matched your Search !! 😔🔍
+             </Typography>
+           </CardContent>
           </Card>
         )}
       </div>
