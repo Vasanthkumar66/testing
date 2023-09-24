@@ -106,3 +106,15 @@
   font-size: 30px;
   color: #000000;
 }
+
+.cart-icon:hover
+{
+  color: #eeb03d;
+  background-color: black;
+}
+
+.cart-icon2:hover
+{
+  color:#eeb03d;
+  background-color: #000000;
+}

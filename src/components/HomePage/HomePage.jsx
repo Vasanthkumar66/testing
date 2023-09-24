@@ -1,10 +1,10 @@
 import React from 'react';
-import HeaderVariant from './Headers/HeaderVariant';
+import AuthHeader from './Headers/AuthHeader';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'; // Import the Navigate component
 import './HomePage.css';
 import Products from '../ProductsPage/Products';
 import Login from '../AuthPages/SigninPage';
-import LandingPage from '../LandingPage';
+import LandingPage from '../LandingPage/LandingPage';
 import Signup from '../AuthPages/SignupPage';
 import { useAuth } from '../AuthPages/useAuth';
 import CartPage from '../ProductsPage/CartPage';
@@ -14,10 +14,9 @@ const HomePage = ({setAlert}) => {
   return (
     <Router>
       <Routes>
-        {/* <Route path="/" element={<><Header/><Carousel/><Products/></>} /> */}
         <Route path="/" element={<LandingPage/>} />
-        <Route path="/login" element={<><HeaderVariant/><Login setAlert={setAlert}/></>} />
-        <Route path="/signup" element={<><HeaderVariant/><Signup setAlert={setAlert}/></>} />
+        <Route path="/login" element={<><AuthHeader/><Login setAlert={setAlert}/></>} />
+        <Route path="/signup" element={<><AuthHeader/><Signup setAlert={setAlert}/></>} />
         {isLoggedIn ? (
           <>
           <Route path="/products" element={<Products/>} />

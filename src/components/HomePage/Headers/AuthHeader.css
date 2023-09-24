@@ -1,0 +1,11 @@
+.button:hover {
+    color: #eeb03d ;
+  }
+
+  .head-title
+  {
+    background: linear-gradient(to right, #eeb03d, #c2763f, #874839, #452527, #000000);
+    font-family:fantasy;
+    font-size: 30px;
+    color: #000000;
+  }

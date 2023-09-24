@@ -102,3 +102,21 @@
     font-size: 30px;
     color: #000000;
   }
+
+  @media (max-width: 600px) {
+    .mobile-button {
+      font-size: 14px; /* Adjust the font size as needed */
+      padding: 8px 16px; /* Adjust the padding as needed */
+    }
+  }
+  
+.search-bar {
+  display: flex;
+  align-items: center;
+}
+
+.search-icon-wrapper {
+  padding: 8px;
+  display: flex;
+  align-items: center;
+}

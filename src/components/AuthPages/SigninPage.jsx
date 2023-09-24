@@ -50,7 +50,7 @@ export default function SigninPage() {
         autoClose: 2500,
         hideProgressBar: false,
         closeOnClick: true,
-        pauseOnHover: true,
+        pauseOnHover: false,
         draggable: true,
         theme: 'colored',
       });

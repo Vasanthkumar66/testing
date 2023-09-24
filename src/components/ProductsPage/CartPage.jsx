@@ -11,12 +11,15 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import emptycart from '../../Assets/empty-cart.png'
 import CardMedia from '@mui/material/CardMedia';
 import InputBase from '@mui/material/InputBase';
 import { styled, alpha } from '@mui/material/styles';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import SearchIcon from '@mui/icons-material/Search';
 import logo from '../HomePage/Headers/header.png';
+import Tooltip from '@mui/material/Tooltip';
+import Zoom from '@mui/material/Zoom';
 import './CartPage.css';
 
 const Search = styled('div')(({ theme }) => ({
@@ -71,14 +74,14 @@ const ProductCard = ({ product, removeFromCart }) => {
         boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
       }}
     >
-      <CardMedia className="product-image" image={images[2]} title={title} />
+      <CardMedia className="product-image" image={images[2]} title={title} children={<div></div>}/>
       <CardContent className="product-details">
-        <Typography
+      <Typography
           gutterBottom
           variant="h6"
           component="div"
           className="product-title"
-          sx={{ fontFamily: 'sans-serif' }}
+          sx={{ fontFamily: "sans-serif" }}
         >
           <strong>
             <u>{title}</u>
@@ -106,12 +109,15 @@ const ProductCard = ({ product, removeFromCart }) => {
           <div className="product-rating">
             {generateStars(3)}
           </div>
+          <Tooltip TransitionComponent={Zoom} placement="left-start" title="Remove">
           <IconButton
+            className='cart-icon'
             onClick={() => removeFromCart(id)}
-            sx={{ color: 'black', marginLeft: '70px' }}
+            sx={{ color: 'black', marginTop:'21px' }}
           >
             <RemoveShoppingCartIcon />
           </IconButton>
+          </Tooltip>
         </div>
       </CardContent>
     </Card>
@@ -167,7 +173,6 @@ const CartPage = () => {
   }, []);
 
   useEffect(() => {
-    // Open the IndexedDB database and fetch the cart items.
     const fetchCartItems = async () => {
       try {
         const db = await openDB('GroceryDB2', 1);
@@ -207,11 +212,9 @@ const CartPage = () => {
 
   const handleSearch = () => {
     if (searchInput.trim() === '') {
-      // If the search input is empty, display all cart items.
       setFilteredProducts(cart);
       setShowNoMatchCard(false);
     } else {
-      // Filter cart items based on the search input.
       const filtered = cart.filter((product) =>
         product.title.toLowerCase().includes(searchInput.toLowerCase())
       );
@@ -242,10 +245,24 @@ const CartPage = () => {
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static" sx={{ backgroundColor: 'black', height: '100px' }}>
           <Toolbar sx={{ display: 'flex', marginTop: 'auto', marginBottom: 'auto', alignItems: 'center' }}>
-            <img src={logo} style={{ width: "120px" }} alt="Logo" />
-            <Typography variant="h7" component="div" sx={{ flexGrow: 1, fontFamily: 'unset', color: 'grey' }}>
-              <span className='head-title'>{typedText}</span>
-            </Typography>
+          <Link to="/" style={{ textDecoration: 'none' }}>
+          <img src={logo} style={{ width: "120px" }} alt="Logo" />
+          </Link>
+          <Typography
+                variant="h7"
+                component="div"
+                sx={{
+                  fontFamily: "unset",
+                  flexGrow: 1,
+                  color: "grey",
+                  display: {
+                    xs: "none",
+                    md: "block",
+                  },
+                }}
+              >
+                <span className="head-title">{typedText}</span>
+              </Typography>
             <Search>
               <SearchIconWrapper>
                 <SearchIcon sx={{ color: '#eeb03d' }} />
@@ -258,7 +275,7 @@ const CartPage = () => {
               />
             </Search>
             <Link to="/products" style={{ textDecoration: 'none' }}>
-              <Button className="button" sx={{ color: 'black', backgroundColor: '#eeb03d', marginLeft: '13px' }}>
+            <Button className='button' sx={{ color: 'black', backgroundColor: '#eeb03d' }}>
                 <ShoppingCartIcon />
                 <Typography variant="body2" sx={{ paddingLeft: '8px' }}>Go to Grocery</Typography>
               </Button>
@@ -266,26 +283,38 @@ const CartPage = () => {
           </Toolbar>
         </AppBar>
       </Box>
-      <Typography
-        variant="h4"
-        sx={{
-          fontFamily: 'fantasy',
-          backgroundImage: 'linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)',
-          WebkitBackgroundClip: 'text',
-          color: 'transparent',
-          marginBottom: '5px',
-          marginTop: '20px',
-          textAlign: 'center',
-          textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)',
-        }}
-      >
-        Your Cart
-      </Typography>
+      {cart.length>=1 ? <Typography
+    variant="h4"
+    sx={{
+      fontFamily: 'fantasy',
+      backgroundImage: 'linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)',
+      WebkitBackgroundClip: 'text',
+      color: 'transparent',
+      marginBottom: '5px',
+      marginTop: '20px',
+      textAlign: 'center',
+      textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)',
+    }}>
+    Your Cart
+  </Typography> : <Typography
+    variant="h4"
+    sx={{
+      fontFamily: 'fantasy',
+      backgroundImage: 'linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)',
+      WebkitBackgroundClip: 'text',
+      color: 'transparent',
+      marginBottom: '5px',
+      marginTop: '20px',
+      textAlign: 'center',
+      textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)',
+    }}>
+    Your Cart is Empty
+  </Typography>}
       <div className="centered-container">
         <div className="product-card-container">
-          {cart.map((product) => (
+          {cart.length>=1 ? cart.map((product) => (
             <ProductCard key={product.id} product={product} removeFromCart={removeFromCart} />
-          ))}
+          )) :   <div><img src={emptycart}/></div>}
         </div>
         {showNoMatchCard && (
           <Card
