@@ -39,9 +39,7 @@ export default function SigninPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     try {
-      // Retrieve user data from local storage
       const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
       const user = storedUsers.find((u) => u.email === formData.email);
 
@@ -63,7 +61,7 @@ export default function SigninPage() {
           autoClose: 3000,
           hideProgressBar: false,
           closeOnClick: true,
-          pauseOnHover: true,
+          pauseOnHover: false,
           draggable: true,
           theme: "colored",
         });
@@ -75,7 +73,7 @@ export default function SigninPage() {
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
-        pauseOnHover: true,
+        pauseOnHover: false,
         draggable: true,
         theme: "colored",
       });
@@ -84,11 +82,7 @@ export default function SigninPage() {
 
   return (
     <div className="login-page">
-      <Container
-        component="main"
-        maxWidth="lg"
-        className="container"
-      >
+      <Container component="main" maxWidth="lg" className="container">
         <Grid container>
           <CssBaseline />
           <Grid
@@ -177,19 +171,26 @@ export default function SigninPage() {
                   }}
                 />
                 <Button
-                  type="submit"
+                  type="subt"
                   fullWidth
                   variant="contained"
-                  sx={{ mt: 3, mb: 2, bgcolor: "#ffbb02", color: "black" }}
+                  sx={{
+                    mt: 3,
+                    mb: 2,
+                    bgcolor: "#eeb03d",
+                    color: "black",
+                    transition: "background-color 0.3s, color 0.3s", // Add transition
+                    "&:hover": {
+                      bgcolor: "black", // Change background color on hover
+                      color: "#eeb03d", // Change text color on hover
+                    },
+                  }}
                 >
                   Sign In
                 </Button>
                 <Grid container>
                   <Grid item>
-                    <RouterLink
-                      to="/signup"
-                      style={{ textDecoration: "none" }}
-                    >
+                    <RouterLink to="/signup" style={{ textDecoration: "none" }}>
                       <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
                         <u>{"Don't have an account? Sign Up"}</u>
                       </Typography>

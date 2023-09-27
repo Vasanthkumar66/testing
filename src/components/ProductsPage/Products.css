@@ -113,12 +113,6 @@
   background-color: black;
 }
 
-.cart-icon2:hover
-{
-  color:#eeb03d;
-  background-color: #000000;
-}
-
 @keyframes fadeInText {
   from {
     opacity: 0;

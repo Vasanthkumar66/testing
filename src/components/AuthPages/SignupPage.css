@@ -17,18 +17,3 @@
   max-width: 300px; /* Adjust the maximum width as needed */
 }
 
-.floating-alert.alert-success {
-  background-color: #dff0d8; /* Background color for success alert */
-  border-color: #d0e9c6; /* Border color for success alert */
-}
-
-.floating-alert.alert-warning {
-  background-color: #fcf8e3; /* Background color for warning alert */
-  border-color: #faebcc; /* Border color for warning alert */
-}
-
-.floating-alert.alert-error {
-  background-color: #f2dede; /* Background color for error alert */
-  border-color: #ebccd1; /* Border color for error alert */
-}
-

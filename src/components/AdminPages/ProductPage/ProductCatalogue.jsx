@@ -1,26 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
+import BadgeIcon from '@mui/icons-material/Badge';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import { useAuth } from "../../AuthPages/useAuth"
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Button from "@mui/material/Button";
 import InputBase from "@mui/material/InputBase";
 import { styled, alpha } from "@mui/material/styles";
-import LoginIcon from "@mui/icons-material/Login";
-import PersonIcon from "@mui/icons-material/Person";
 import SearchIcon from "@mui/icons-material/Search";
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import Slider from "react-slick";
-import logo from "../HomePage/Headers/header.png";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import { Link } from "react-router-dom";
-import "./LandingPage.css";
-import car1 from "../../Assets/car1.jpg";
-import car2 from "../../Assets/car2.jpg";
+import { Button } from "@mui/material";
+import InventoryIcon from '@mui/icons-material/Inventory';
+import logo from "../../HomePage/Headers/header.png"
+import PersonIcon from "@mui/icons-material/Person";
+import "./ProductCatalogue.css";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -61,8 +59,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const ProductCard = ({ product }) => {
-  const { id, title, price, description, images } = product;
+const ProductCard = ({ product, cart, setCart }) => {
+  const { title, price, description, images, quantity } = product;
 
   return (
     <Card
@@ -113,11 +111,39 @@ const ProductCard = ({ product }) => {
           </span>
           <span className="tail"> (25%off)</span>
         </Typography>
-        <div className="product-rating">{generateStars(3)}</div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div className="product-rating">{generateStars(3)}</div>
+        </div>
+        {typeof quantity === "undefined" ? (
+          <Typography
+            variant="body1"
+            color="green"
+            className="product-availability"
+          >
+            <VerifiedIcon sx={{ fontSize: "13px", marginTop: "12px" }} />
+            <strong> In Stock</strong>
+          </Typography>
+        ) : (
+          <Typography
+            variant="body1"
+            color="red"
+            className="product-availability"
+          >
+            <VerifiedIcon sx={{ fontSize: "13px", marginTop: "12px" }} />
+            <strong> Only {quantity} left !!</strong>
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );
 };
+
 
 const generateStars = (rating) => {
   const maxStars = 5;
@@ -140,28 +166,20 @@ const generateStars = (rating) => {
   return starIcons;
 };
 
-const LandingPage = () => {
+const ProductCatalogue = () => {
   const [typedText, setTypedText] = useState("");
-  const fullText = "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
+  const fullText = "\u00A0Your Grocery Delivery Partner...";
   const delay = 75;
   const [effVar, setEffVar] = useState(true);
   const [searchInput, setSearchInput] = useState("");
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [carouselImages] = useState([car1, car2]);
   const [showNoMatchCard, setShowNoMatchCard] = useState(false);
   const noMatchCardRef = useRef(null);
+  const {adminLogout} = useAuth()
+  const [cart, setCart] = useState([]);
 
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 1000,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 2000,
-  };
-
+  
   useEffect(() => {
     let currentIndex = 0;
     const typingInterval = setInterval(() => {
@@ -185,30 +203,35 @@ const LandingPage = () => {
       clearInterval(toggleInterval);
     };
   }, []);
+
   useEffect(() => {
-    const localProducts = JSON.parse(localStorage.getItem("items")) || [];
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCart(storedCart);
     fetch("https://api.escuelajs.co/api/v1/products")
       .then((response) => response.json())
       .then((data) => {
-        const mergedProducts = [...localProducts, ...data];
+        const localStorageItems =
+          JSON.parse(localStorage.getItem("items")) || [];
+        const mergedProducts = [...localStorageItems, ...data];
         setProducts(mergedProducts);
         setFilteredProducts(mergedProducts);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
+
   const handleSearch = () => {
-    const lowercasedSearchInput = searchInput.toLowerCase().trim(); // Convert search input to lowercase
-    if (lowercasedSearchInput === "") {
+    if (searchInput.trim() === "") {
       setFilteredProducts(products);
       setShowNoMatchCard(false);
     } else {
       const filtered = products.filter((product) =>
-        product.title.toLowerCase().includes(lowercasedSearchInput)
+        product.title.toLowerCase().includes(searchInput.toLowerCase())
       );
       console.log(filtered);
       setFilteredProducts(filtered);
       setShowNoMatchCard(filtered.length === 0);
     }
+
     if (filteredProducts.length > 0) {
       const firstMatchedProduct = document.querySelector(".product-card");
       if (firstMatchedProduct) {
@@ -232,84 +255,47 @@ const LandingPage = () => {
       <Box sx={{ flexGrow: 1 }}>
         <AppBar
           position="static"
-          sx={{ backgroundColor: "black", height: "100%" }}
+          sx={{ backgroundColor: "black", height: "100px" }}
         >
           <Toolbar
             sx={{
               display: "flex",
-              justifyContent: "flex-end",
+              marginTop: "auto",
+              marginBottom: "auto",
               alignItems: "center",
-              flexDirection: { xs: "column", md: "row" },
-              padding: "8px",
             }}
           >
-            <Link
-              to="/"
-              style={{
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
+            <Link to="/" style={{ textDecoration: "none" }}>
               <img src={logo} style={{ width: "120px" }} alt="Logo" />
-              <Typography
-                variant="h7"
-                component="div"
-                sx={{
-                  fontFamily: "unset",
-                  flexGrow: 1,
-                  color: "grey",
-                  display: {
-                    xs: "none",
-                    md: "block",
-                  },
-                }}
-              >
-                <span className="head-title">{typedText}</span>
-              </Typography>
             </Link>
-            <div
+            <Typography
+              variant="h7"
+              component="div"
               sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexDirection: "column",
-                mt: { xs: "8px", md: "0" },
+                flexGrow: 1,
+                fontFamily: "unset",
+                color: "grey",
+                display: {
+                  xs: "none",
+                  md: "block",
+                },
               }}
             >
-              <Search sx={{ marginTop: "7px" }}>
-                <SearchIconWrapper>
-                  <SearchIcon sx={{ color: "#eeb03d" }} />
-                </SearchIconWrapper>
-                <StyledInputBase
-                  placeholder="Search for products..."
-                  inputProps={{ "aria-label": "search" }}
-                  onChange={handleInputChange}
-                  value={searchInput}
-                />
-              </Search>
-            </div>
-
+              <span className="head-title">{typedText}</span>
+            </Typography>
+            <Search>
+              <SearchIconWrapper>
+                <SearchIcon sx={{ color: "#eeb03d" }} />
+              </SearchIconWrapper>
+              <StyledInputBase
+                placeholder="Search for products..."
+                inputProps={{ "aria-label": "search" }}
+                onChange={handleInputChange}
+                value={searchInput}
+              />
+            </Search>
             <div sx={{ display: "flex", alignItems: "center", mt: "8px" }}>
-              <Link
-                to="/login"
-                style={{ textDecoration: "none", marginRight: "8px" }}
-              >
-                <Button
-                  className="mobile-button button"
-                  sx={{
-                    color: "black",
-                    backgroundColor: "#eeb03d",
-                    marginTop: "7px",
-                  }}
-                >
-                  <LoginIcon />
-                  <Typography variant="body2" sx={{ paddingLeft: "10px" }}>
-                    Login
-                  </Typography>
-                </Button>
-              </Link>
-              <Link to="/signup" style={{ textDecoration: "none" }}>
+            <Link to="/employee-page" style={{ textDecoration: "none", marginRight: "8px" }}>
                 <Button
                   className="mobile-button button"
                   sx={{
@@ -319,25 +305,61 @@ const LandingPage = () => {
                     marginTop: "7px",
                   }}
                 >
-                  <PersonIcon />
+                  <BadgeIcon />
                   <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
-                    Signup
+                    Employee Page
                   </Typography>
                 </Button>
               </Link>
-              <Link to="/admin" style={{ textDecoration: "none" }}>
+              <Link to="/customer-page" style={{ textDecoration: "none", marginRight: "8px" }}>
                 <Button
                   className="mobile-button button"
                   sx={{
                     color: "black",
                     backgroundColor: "#eeb03d",
-                    marginLeft: "19px",
+                    marginLeft: "13px",
                     marginTop: "7px",
                   }}
                 >
-                  <AdminPanelSettingsIcon />
+                  <SupportAgentIcon />
                   <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
-                    Admin
+                    Customer Page
+                  </Typography>
+                </Button>
+              </Link>
+              <Link
+                to="/inventory"
+                style={{ textDecoration: "none", marginRight: "8px" }}
+              >
+                <Button
+                  className="mobile-button button"
+                  sx={{
+                    color: "black",
+                    backgroundColor: "#eeb03d",
+                    marginLeft: "13px",
+                    marginTop: "7px",
+                  }}
+                >
+                  <InventoryIcon />
+                  <Typography variant="body2" sx={{ paddingLeft: "10px" }}>
+                    Inventory
+                  </Typography>
+                </Button>
+              </Link>
+              <Link to="/login" style={{ textDecoration: "none" }}>
+                <Button
+                  className="mobile-button button"
+                  sx={{
+                    color: "black",
+                    backgroundColor: "#eeb03d",
+                    marginLeft: "13px",
+                    marginTop: "7px",
+                  }}
+                  onClick={()=>adminLogout()}
+                >
+                  <PersonIcon />
+                  <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
+                    User Sign in
                   </Typography>
                 </Button>
               </Link>
@@ -345,15 +367,6 @@ const LandingPage = () => {
           </Toolbar>
         </AppBar>
       </Box>
-      <div className="image-slideshow">
-        <Slider {...settings}>
-          {carouselImages.map((image, index) => (
-            <div key={index}>
-              <img className="img" src={image} alt={`Offer ${index + 1}`} />
-            </div>
-          ))}
-        </Slider>
-      </div>
       <Typography
         variant="h4"
         sx={{
@@ -365,65 +378,61 @@ const LandingPage = () => {
           marginBottom: "5px",
           marginTop: "20px",
           textAlign: "center",
-          textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)", // Add a shadow here
+          textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
         }}
       >
-        Our Products
+        Product Catalog
       </Typography>
-      <Link
-        to="/login"
-        className="product-link"
-        style={{ textDecoration: "none", cursor: "auto" }}
-      >
-        <div className="centered-container">
-          <div className="product-card-container">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-          {showNoMatchCard && (
-            <Card
-              ref={noMatchCardRef}
-              className="product-card no-match-card"
-              sx={{
-                width: "100%",
-                padding: "2rem",
-                background:
-                  "linear-gradient(to right, rgba(238, 176, 61, 0.5), rgba(194, 118, 63, 0.5), rgba(135, 72, 57, 0.5), rgba(69, 37, 39, 0.5), rgba(0, 0, 0, 0.5))",
-                color: "#fff",
-                borderRadius: "8px",
-                boxShadow:
-                  "0px 2px 10px rgba(0, 0, 0, 0.3)",
-                animation: "fadeIn 1s ease-in-out",
-              }}
-            >
-              <CardContent>
-                <Typography
-                  gutterBottom
-                  variant="h5"
-                  component="div"
-                  className="product-title"
-                  sx={{
-                    fontFamily: "monospace",
-                    fontSize: "24px" /* Increased text size */,
-                    textAlign: "center",
-                    opacity: 0,
-                    animation: "fadeInText 3s ease-in-out forwards",
-                    textShadow:
-                      "2px 2px 4px rgba(0, 0, 0, 0.5)" /* Added text shadow */,
-                    color: "black" /* Changed font color for contrast */,
-                    WebkitTextStroke: "0.5px black" /* Added glow effect */,
-                  }}
-                >
-                  No Items matched your Search !! 😔🔍
-                </Typography>
-              </CardContent>
-            </Card>
-          )}
+      <div className="centered-container">
+        <div className="product-card-container">
+          {filteredProducts.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              cart={cart}
+              setCart={setCart}
+            />
+          ))}
         </div>
-      </Link>
+        {showNoMatchCard && (
+          <Card
+            ref={noMatchCardRef}
+            className="product-card no-match-card"
+            sx={{
+              width: "100%",
+              padding: "2rem",
+              background:
+                "linear-gradient(to right, rgba(238, 176, 61, 0.5), rgba(194, 118, 63, 0.5), rgba(135, 72, 57, 0.5), rgba(69, 37, 39, 0.5), rgba(0, 0, 0, 0.5))",
+              color: "#fff",
+              borderRadius: "8px",
+              boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.3)",
+              animation: "fadeIn 1s ease-in-out",
+            }}
+          >
+            <CardContent>
+              <Typography
+                gutterBottom
+                variant="h5"
+                component="div"
+                className="product-title"
+                sx={{
+                  fontFamily: "monospace",
+                  fontSize: "24px",
+                  textAlign: "center",
+                  opacity: 0,
+                  animation: "fadeInText 3s ease-in-out forwards",
+                  textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+                  color: "black",
+                  WebkitTextStroke: "0.5px black",
+                }}
+              >
+                No Items matched your Search !! 😔🔍
+              </Typography>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };
-
-export default LandingPage;
+export default ProductCatalogue;

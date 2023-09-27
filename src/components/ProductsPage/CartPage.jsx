@@ -1,64 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
-import AppBar from '@mui/material/AppBar';
-import IconButton from '@mui/material/IconButton';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import emptycart from '../../Assets/empty-cart.png'
-import CardMedia from '@mui/material/CardMedia';
-import InputBase from '@mui/material/InputBase';
-import { styled, alpha } from '@mui/material/styles';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import SearchIcon from '@mui/icons-material/Search';
-import logo from '../HomePage/Headers/header.png';
-import Tooltip from '@mui/material/Tooltip';
-import Zoom from '@mui/material/Zoom';
-import './CartPage.css';
-
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(3),
-    width: 'auto',
-  },
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
-    },
-  },
-}));
+import React, { useState, useEffect, useRef } from "react";
+import AppBar from "@mui/material/AppBar";
+import IconButton from "@mui/material/IconButton";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Card from "@mui/material/Card";
+import ShopIcon from '@mui/icons-material/Shop';
+import CardContent from "@mui/material/CardContent";
+import emptycart from "../../Assets/empty-cart.png";
+import CardMedia from "@mui/material/CardMedia";
+import PurchaseForm from "./PurchaseForm";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import logo from "../HomePage/Headers/header.png";
+import Tooltip from "@mui/material/Tooltip";
+import Zoom from "@mui/material/Zoom";
+import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 
 const ProductCard = ({ product, removeFromCart }) => {
   const { id, title, price, description, images } = product;
@@ -68,14 +28,19 @@ const ProductCard = ({ product, removeFromCart }) => {
       className="product-card"
       sx={{
         background:
-          'linear-gradient(to top, #eeeeee, #ebe6eb, #ecdde3, #eed5d5, #ebcec3, #ebcebb, #e8cfb4, #e2d0ae, #e8d4af, #edd8af, #f3ddb0, #f8e1b0)',
-        borderRadius: '8px',
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+          "linear-gradient(to top, #eeeeee, #ebe6eb, #ecdde3, #eed5d5, #ebcec3, #ebcebb, #e8cfb4, #e2d0ae, #e8d4af, #edd8af, #f3ddb0, #f8e1b0)",
+        borderRadius: "8px",
+        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
       }}
     >
-      <CardMedia className="product-image" image={images[2]} title={title} children={<div></div>}/>
+      <CardMedia
+        className="product-image"
+        image={images[0]}
+        title={title}
+        children={<div></div>}
+      />
       <CardContent className="product-details">
-      <Typography
+        <Typography
           gutterBottom
           variant="h6"
           component="div"
@@ -101,21 +66,41 @@ const ProductCard = ({ product, removeFromCart }) => {
           <span className="price">
             <strong>₹ {price} </strong>
           </span>
-          <span className="head"> M.R.P:<s>{price + 123}</s></span>
-          <span className="tail"> (84%off)</span>
+          <span className="head">
+            {" "}
+            M.R.P:<s>{parseInt(price) + parseInt(price) * (25 / 100)}</s>
+          </span>
+          <span className="tail"> (25%off)</span>
         </Typography>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div className="product-rating">
-            {generateStars(3)}
-          </div>
-          <Tooltip TransitionComponent={Zoom} placement="left-start" title="Remove">
-          <IconButton
-            className='cart-icon'
-            onClick={() => removeFromCart(id)}
-            sx={{ color: 'black', marginTop:'21px' }}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div className="product-rating">{generateStars(3)}</div>
+          <Tooltip
+            TransitionComponent={Zoom}
+            placement="left-start"
+            title="Remove"
           >
-            <RemoveShoppingCartIcon />
-          </IconButton>
+            <IconButton
+              className="cart-icon"
+              onClick={() => removeFromCart(id)}
+              sx={{
+                color: "#eeb03d",
+                marginTop: "21px",
+                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                transition: "color 0.3s, background-color 0.3s",
+                "&:hover": {
+                  color: "rgba(0, 0, 0, 0.7)",
+                  backgroundColor: "#eeb03d",
+                },
+              }}
+            >
+              <RemoveShoppingCartIcon />
+            </IconButton>
           </Tooltip>
         </div>
       </CardContent>
@@ -128,24 +113,39 @@ const generateStars = (rating) => {
   const starIcons = [];
   for (let i = 0; i < maxStars; i++) {
     if (i < rating) {
-      starIcons.push(<span key={i} className="star-icon gold">&#9733;</span>);
+      starIcons.push(
+        <span key={i} className="star-icon gold">
+          &#9733;
+        </span>
+      );
     } else {
-      starIcons.push(<span key={i} className="star-icon gold">&#9734;</span>);
+      starIcons.push(
+        <span key={i} className="star-icon gold">
+          &#9734;
+        </span>
+      );
     }
   }
   return starIcons;
 };
 
 const CartPage = () => {
-    const [typedText, setTypedText] = useState('');
-    const fullText = "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
-    const delay = 75;
-    const [effVar, setEffVar] = useState(true);
-    const [searchInput, setSearchInput] = useState('');
-    const [cart, setCart] = useState([]);
-    const [filteredProducts, setFilteredProducts] = useState([]); // Add this line
-    const [showNoMatchCard, setShowNoMatchCard] = useState(false); // Add this line
-    const noMatchCardRef = useRef(null);
+  const [typedText, setTypedText] = useState("");
+  const fullText =
+    "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
+  const delay = 75;
+  const [effVar, setEffVar] = useState(true);
+  const [cart, setCart] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedUser, setSelectedUser] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+    setUsers(storedUsers);
+  }, []);
 
   useEffect(() => {
     let currentIndex = 0;
@@ -172,176 +172,227 @@ const CartPage = () => {
   }, []);
 
   useEffect(() => {
-    // Retrieve cart data from local storage on component mount
-    const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
     setCart(storedCart);
   }, []);
 
+  useEffect(() => {
+    const calculatedTotalPrice = cart.reduce(
+      (total, product) => total + parseFloat(product.price),
+      0
+    );
+    setTotalPrice(calculatedTotalPrice);
+  }, [cart]);
+
   const removeFromCart = (productId) => {
-    // Remove the product from the cart in state
     const updatedCart = cart.filter((product) => product.id !== productId);
     setCart(updatedCart);
-
-    // Remove the product from local storage
     const updatedLocalStorageCart = cart.filter(
       (product) => product.id !== productId
     );
-    localStorage.setItem('cart', JSON.stringify(updatedLocalStorageCart));
+    localStorage.setItem("cart", JSON.stringify(updatedLocalStorageCart));
 
     toast.info(`Item removed from the cart 🙂`, {
-      position: 'top-right',
+      position: "top-right",
       autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
-      pauseOnHover: true,
+      pauseOnHover: false,
       draggable: true,
       progress: undefined,
-      theme: 'colored',
+      theme: "colored",
     });
   };
 
-  const handleSearch = () => {
-    if (searchInput.trim() === '') {
-      setFilteredProducts(cart);
-      setShowNoMatchCard(false);
-    } else {
-      const filtered = cart.filter((product) =>
-        product.title.toLowerCase().includes(searchInput.toLowerCase())
-      );
-      setFilteredProducts(filtered);
-      setShowNoMatchCard(filtered.length === 0);
-    }
+  const handleFormOpen = () => {
+    setShowForm(true);
+  };
 
-    if (filteredProducts.length > 0) {
-      const firstMatchedProduct = document.querySelector('.product-card');
-      if (firstMatchedProduct) {
-        firstMatchedProduct.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else if (noMatchCardRef.current) {
-      noMatchCardRef.current.scrollIntoView({ behavior: 'smooth' });
+  const handleUserSelect = (event) => {
+    setSelectedUser(event.target.value);
+  };
+
+  const handleProductSelect = (event) => {
+    const productId = parseInt(event.target.value);
+    if (event.target.checked) {
+      setSelectedProducts([...selectedProducts, productId]);
+    } else {
+      setSelectedProducts(selectedProducts.filter((id) => id !== productId));
     }
   };
 
-  const handleInputChange = (event) => {
-    const query = event.target.value;
-    setSearchInput(query);
-    setTimeout(() => {
-      handleSearch();
-    }, 1000);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const user = users.find((u) => u.email === selectedUser);
+
+    if (user) {
+      user.boughtProducts = user.boughtProducts || [];
+      user.boughtProducts.push(...selectedProducts);
+      localStorage.setItem("users", JSON.stringify(users));
+    }
+
+    setSelectedUser("");
+    setSelectedProducts([]);
+    setShowForm(false);
+
+    toast.success(`Products purchased successfully! 🛒`, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
   };
 
   return (
     <div>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static" sx={{ backgroundColor: 'black', height: '100px' }}>
-          <Toolbar sx={{ display: 'flex', marginTop: 'auto', marginBottom: 'auto', alignItems: 'center' }}>
-          <Link to="/" style={{ textDecoration: 'none' }}>
-          <img src={logo} style={{ width: "120px" }} alt="Logo" />
-          </Link>
-          <Typography
-                variant="h7"
-                component="div"
+        <AppBar
+          position="static"
+          sx={{ backgroundColor: "black", height: "100px" }}
+        >
+          <Toolbar
+            sx={{
+              display: "flex",
+              marginTop: "auto",
+              marginBottom: "auto",
+              alignItems: "center",
+            }}
+          >
+            <Link to="/" style={{ textDecoration: "none" }}>
+              <img src={logo} style={{ width: "120px" }} alt="Logo" />
+            </Link>
+            <Typography
+              variant="h7"
+              component="div"
+              sx={{
+                fontFamily: "unset",
+                flexGrow: 1,
+                color: "grey",
+                display: {
+                  xs: "none",
+                  md: "block",
+                },
+              }}
+            >
+              <span className="head-title">{typedText}</span>
+            </Typography>
+            <Link to="/products" style={{ textDecoration: "none" }}>
+              <Button
+                className="button"
                 sx={{
-                  fontFamily: "unset",
-                  flexGrow: 1,
-                  color: "grey",
-                  display: {
-                    xs: "none",
-                    md: "block",
-                  },
+                  color: "black",
+                  backgroundColor: "#eeb03d",
+                  marginLeft: "16px",
                 }}
               >
-                <span className="head-title">{typedText}</span>
-              </Typography>
-            <Search>
-              <SearchIconWrapper>
-                <SearchIcon sx={{ color: '#eeb03d' }} />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search for products..."
-                inputProps={{ 'aria-label': 'search' }}
-                onChange={handleInputChange}
-                value={searchInput}
-              />
-            </Search>
-            <Link to="/products" style={{ textDecoration: 'none' }}>
-            <Button className='button' sx={{ color: 'black', backgroundColor: '#eeb03d' }}>
                 <ShoppingCartIcon />
-                <Typography variant="body2" sx={{ paddingLeft: '8px' }}>Go to Grocery</Typography>
+                <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
+                  Go to Grocery
+                </Typography>
               </Button>
             </Link>
+            {cart.length >= 1 ? <Button
+                className="button"
+                sx={{
+                  color: "black",
+                  backgroundColor: "#eeb03d",
+                  marginLeft: "16px",
+                }}
+                onClick={() => setShowForm(!showForm)}
+              >
+                <ShopIcon sx={{fontSize:"20px"}} />
+                <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
+                 Purchase
+                </Typography>
+              </Button>:<></>}
+         
+            {cart.length >= 1 && (
+              <div>
+                <Button
+                  className="button"
+                  sx={{
+                    color: "black",
+                    backgroundColor: "#eeb03d",
+                    marginLeft: "16px",
+                  }}
+                >
+                  <CurrencyRupeeIcon />
+                  <Typography variant="subtitle2" sx={{ paddingLeft: "5px", fontSize:"20px", paddingRight: "5px" }}>
+                  <strong>{totalPrice.toFixed(2)}</strong>
+                  </Typography>
+                </Button>
+              </div>
+            )}
           </Toolbar>
         </AppBar>
       </Box>
-      {cart.length >= 1 ? <Typography
-    variant="h4"
-    sx={{
-      fontFamily: 'fantasy',
-      backgroundImage: 'linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)',
-      WebkitBackgroundClip: 'text',
-      color: 'transparent',
-      marginBottom: '5px',
-      marginTop: '20px',
-      textAlign: 'center',
-      textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)',
-    }}>
-    Your Cart
-  </Typography> : <Typography
-    variant="h4"
-    sx={{
-      fontFamily: 'fantasy',
-      backgroundImage: 'linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)',
-      WebkitBackgroundClip: 'text',
-      color: 'transparent',
-      marginBottom: '5px',
-      marginTop: '20px',
-      textAlign: 'center',
-      textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)',
-    }}>
-    Your Cart is Empty
-  </Typography>}
+      {cart.length >= 1 ? (
+        <Typography
+          variant="h4"
+          sx={{
+            fontFamily: "fantasy",
+            backgroundImage:
+              "linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)",
+            WebkitBackgroundClip: "text",
+            color: "transparent",
+            marginBottom: "5px",
+            marginTop: "20px",
+            textAlign: "center",
+            textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          Your Cart
+        </Typography>
+      ) : (
+        <Typography
+          variant="h4"
+          sx={{
+            fontFamily: "fantasy",
+            backgroundImage:
+              "linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)",
+            WebkitBackgroundClip: "text",
+            color: "transparent",
+            marginBottom: "5px",
+            marginTop: "20px",
+            textAlign: "center",
+            textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          Your Cart is Empty
+        </Typography>
+      )}
       <div className="centered-container">
         <div className="product-card-container">
-          {cart.length >= 1 ? cart.map((product) => (
-            <ProductCard key={product.id} product={product} removeFromCart={removeFromCart} />
-          )) :   <div className='mt-image'><img src={emptycart} alt="Empty Cart"/></div>}
+          {cart.length >= 1 ? (
+            cart.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                removeFromCart={removeFromCart}
+              />
+            ))
+          ) : (
+            <div className="mt-image">
+              <img src={emptycart} alt="Empty Cart" />
+            </div>
+          )}
         </div>
-        {showNoMatchCard && (
-          <Card
-          ref={noMatchCardRef}
-          className="product-card no-match-card"
-          sx={{
-            width: "100%",
-            padding: "2rem",
-            background: "linear-gradient(to right, rgba(238, 176, 61, 0.5), rgba(194, 118, 63, 0.5), rgba(135, 72, 57, 0.5), rgba(69, 37, 39, 0.5), rgba(0, 0, 0, 0.5))",
-            color: "#fff",
-            borderRadius: "8px",
-            boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.3)", /* Increased box shadow */
-            animation: "fadeIn 1s ease-in-out",
-          }}
-         >
-          <CardContent>
-            <Typography
-              gutterBottom
-              variant="h5"
-              component="div"
-              className="product-title"
-              sx={{
-                fontFamily: "monospace",
-                fontSize: "24px", /* Increased text size */
-                textAlign: "center",
-                opacity: 0,
-                animation: "fadeInText 3s ease-in-out forwards",
-                textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)", /* Added text shadow */
-                color: "black", /* Changed font color for contrast */
-                WebkitTextStroke: "0.5px black", /* Added glow effect */
-              }}
-            >
-              No Items matched your Search !! 😔🔍
-            </Typography>
-          </CardContent>
-         </Card>
+        <div className="purchase-form">
+        {showForm && (
+         <PurchaseForm
+         selectedUser={selectedUser}
+         handleUserSelect={handleUserSelect}
+         cart={cart}
+         handleProductSelect={handleProductSelect}
+         handleSubmit={handleSubmit}
+         users={users}
+       />
         )}
+        </div>
       </div>
     </div>
   );

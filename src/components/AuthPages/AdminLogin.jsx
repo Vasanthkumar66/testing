@@ -2,31 +2,30 @@ import React, { useState } from "react";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import { toast } from "react-toastify";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
+import { toast } from "react-toastify";
 import Typography from "@mui/material/Typography";
 import { Container } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
-import bcrypt from "bcryptjs";
+import "./AdminLogin.css";
 import loginlogo from "../../Assets/login-logo.png";
-import "./SignupPage.css";
+import { useAuth } from "./useAuth";
 
-export default function SignupPage() {
+export default function AdminLogin() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: "",
     email: "",
     password: "",
-    confirmPassword: "",
-    country: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+
+  const { adminLogin } = useAuth();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -39,65 +38,35 @@ export default function SignupPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
     try {
-      if (formData.password !== formData.confirmPassword) {
-        toast.warning("Password and Confirm password do not match", {
+      const storedAdminJSON = localStorage.getItem("admin");
+      const storedAdmin = storedAdminJSON ? JSON.parse(storedAdminJSON) : [];
+  
+      const admin = storedAdmin.find((u) => u.email === formData.email);
+  
+      if (admin && (formData.password === admin.password)) {
+        adminLogin();
+        toast.success("Signed In as Admin Successfully!!", {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 2500,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: false,
           draggable: true,
           theme: "colored",
         });
-        return;
-      }
-
-      const hashedPassword = await bcrypt.hash(formData.password, 10);
-      const newUser = {
-        username: formData.username,
-        email: formData.email,
-        password: hashedPassword,
-        country: formData.country,
-      };
-
-      const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-      const userExists = storedUsers.find(
-        (user) => user.email === formData.email
-      );
-
-      if (userExists) {
-        toast.warning("User with this e-mail already exists!!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          theme: "colored",
-        });
+        navigate("/inventory");
       } else {
-        storedUsers.push(newUser);
-        localStorage.setItem("users", JSON.stringify(storedUsers));
-
-        toast.success("User created successfully!!", {
+        toast.error("Your'e not Authorised, please access through User Login 😉", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
           closeOnClick: true,
-          pauseOnHover: false,
+          pauseOnHover: true,
           draggable: true,
           theme: "colored",
         });
-        setFormData({
-          username: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-          country: "",
-        });
-        navigate("/login");
       }
     } catch (error) {
       console.error("Error:", error);
@@ -106,20 +75,19 @@ export default function SignupPage() {
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
-        pauseOnHover: false,
+        pauseOnHover: true,
         draggable: true,
         theme: "colored",
       });
     }
   };
-
+  
   return (
-    <div className="signup-page">
+    <div className="login-page">
       <Container
         component="main"
-        maxWidth="md"
+        maxWidth="lg"
         className="container"
-        style={{ marginTop: "30px", marginBottom: "30px" }}
       >
         <Grid container>
           <CssBaseline />
@@ -152,7 +120,7 @@ export default function SignupPage() {
           >
             <Box
               sx={{
-                my: 3,
+                my: 8,
                 mx: 4,
                 display: "flex",
                 flexDirection: "column",
@@ -160,7 +128,7 @@ export default function SignupPage() {
               }}
             >
               <Typography component="h1" variant="h5">
-                Sign up
+                Admin Log In 
               </Typography>
               <Box
                 component="form"
@@ -172,22 +140,11 @@ export default function SignupPage() {
                   margin="normal"
                   required
                   fullWidth
-                  id="username"
-                  label="Username"
-                  name="username"
-                  autoComplete="username"
-                  autoFocus
-                  value={formData.username}
-                  onChange={handleInputChange}
-                />
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
                   id="email"
                   label="Email Address"
                   name="email"
                   autoComplete="email"
+                  autoFocus
                   value={formData.email}
                   onChange={handleInputChange}
                 />
@@ -199,7 +156,7 @@ export default function SignupPage() {
                   label="Password"
                   type={showPassword ? "text" : "password"}
                   id="password"
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   value={formData.password}
                   onChange={handleInputChange}
                   InputProps={{
@@ -219,52 +176,20 @@ export default function SignupPage() {
                     ),
                   }}
                 />
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="confirmPassword"
-                  label="Confirm Password"
-                  type="password"
-                  id="confirmPassword"
-                  autoComplete="new-password"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                />
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="country"
-                  label="Country"
-                  id="country"
-                  value={formData.country}
-                  onChange={handleInputChange}
-                />
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{
-                    mt: 3,
-                    mb: 2,
-                    bgcolor: "#eeb03d",
-                    color: "black",
-                    transition: "background-color 0.3s, color 0.3s",
-                    "&:hover": {
-                      bgcolor: "black",
-                      color: "#eeb03d",
-                    },
-                  }}
+                  sx={{ mt: 3, mb: 2, bgcolor: "#ffbb02", color: "black" }}
                 >
-                  Sign Up
+                  Sign In
                 </Button>
                 <Grid container>
                   <Grid item>
-                    <RouterLink to="/login" style={{ textDecoration: "none" }}>
-                      <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
-                        <u>Already have an account? Sign In</u>
-                      </Typography>
+                    <RouterLink
+                      to="/signup"
+                      style={{ textDecoration: "none" }}
+                    >
                     </RouterLink>
                   </Grid>
                 </Grid>

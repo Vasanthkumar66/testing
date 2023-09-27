@@ -1,23 +1,18 @@
-import { useState, useEffect, useContext, createContext } from 'react';
+import { useState, useContext, createContext } from 'react';
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdminLoggedIn, setAdminLoggedIn] = useState(false);
 
-  // You can implement your authentication logic here
-
-  // useEffect(() => {
-  //   const isAuthenticated = false;
-  //   setIsLoggedIn(isAuthenticated);
-  // }, []);
-
-  // Add setter methods
   const login = () => setIsLoggedIn(true);
   const logout = () => setIsLoggedIn(false);
+  const adminLogin = () => setAdminLoggedIn(true)
+  const adminLogout = () => setAdminLoggedIn(false)
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, logout, isAdminLoggedIn, adminLogin, adminLogout }}>
       {children}
     </AuthContext.Provider>
   );

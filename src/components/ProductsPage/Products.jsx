@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "../AuthPages/useAuth";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
@@ -63,27 +64,22 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 const ProductCard = ({ product, cart, setCart }) => {
-  const { id, title, price, description, images } = product;
+  const { id, title, price, description, images, quantity } = product;
 
   const addToCart = (product) => {
-    // Add product to the cart state
     setCart([...cart, product]);
-
-    // Save the updated cart state to local storage
     localStorage.setItem("cart", JSON.stringify([...cart, product]));
-
     toast.info(`${product.title} added to the cart 😉`, {
       position: "top-right",
       autoClose: 2000,
       hideProgressBar: false,
       closeOnClick: true,
-      pauseOnHover: true,
+      pauseOnHover: false,
       draggable: true,
       progress: undefined,
       theme: "colored",
     });
   };
-
   return (
     <Card
       className="product-card"
@@ -94,7 +90,12 @@ const ProductCard = ({ product, cart, setCart }) => {
         boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
       }}
     >
-      <CardMedia className="product-image" image={images[2]} title={title} children={<div></div>} />
+      <CardMedia
+        className="product-image"
+        image={images[0]}
+        title={title}
+        children={<div></div>}
+      />
       <CardContent className="product-details">
         <Typography
           gutterBottom
@@ -144,12 +145,40 @@ const ProductCard = ({ product, cart, setCart }) => {
             <IconButton
               className="cart-icon2"
               onClick={() => addToCart(product)}
-              sx={{ color: "black", marginTop: "21px" }}
+              sx={{
+                color: "#eeb03d",
+                marginTop: "21px",
+                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                transition: "color 0.3s, background-color 0.3s", 
+                "&:hover": {
+                  color: "rgba(0, 0, 0, 0.7)", 
+                  backgroundColor: "#eeb03d", 
+                },
+              }}
             >
               <AddShoppingCartIcon />
             </IconButton>
           </Tooltip>
         </div>
+        {typeof quantity === "undefined" ? (
+          <Typography
+            variant="body1"
+            color="green"
+            className="product-availability"
+          >
+            <VerifiedIcon sx={{ fontSize: "13px", marginTop: "12px" }} />
+            <strong> In Stock</strong>
+          </Typography>
+        ) : (
+          <Typography
+            variant="body1"
+            color="red"
+            className="product-availability"
+          >
+            <VerifiedIcon sx={{ fontSize: "13px", marginTop: "12px" }} />
+            <strong> Only {quantity} left !!</strong>
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );
@@ -192,15 +221,16 @@ const Products = () => {
   const [cart, setCart] = useState([]);
 
   useEffect(() => {
-    // Retrieve cart data from local storage on component mount
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
     setCart(storedCart);
-
     fetch("https://api.escuelajs.co/api/v1/products")
       .then((response) => response.json())
       .then((data) => {
-        setProducts(data);
-        setFilteredProducts(data);
+        const localStorageItems =
+          JSON.parse(localStorage.getItem("items")) || [];
+        const mergedProducts = [...localStorageItems, ...data];
+        setProducts(mergedProducts);
+        setFilteredProducts(mergedProducts);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
@@ -213,6 +243,7 @@ const Products = () => {
       const filtered = products.filter((product) =>
         product.title.toLowerCase().includes(searchInput.toLowerCase())
       );
+      console.log(filtered);
       setFilteredProducts(filtered);
       setShowNoMatchCard(filtered.length === 0);
     }
@@ -226,6 +257,7 @@ const Products = () => {
       noMatchCardRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
+
   const handleInputChange = (event) => {
     const query = event.target.value;
     setSearchInput(query);
@@ -342,63 +374,61 @@ const Products = () => {
           marginBottom: "5px",
           marginTop: "20px",
           textAlign: "center",
-          textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)", // Add a shadow here
+          textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
         }}
       >
         Our Products
       </Typography>
       <div className="centered-container">
         <div className="product-card-container">
-          {filteredProducts
-            .slice(1, filteredProducts.length - 1)
-            .map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                cart={cart}
-                setCart={setCart}
-              />
-            ))}
+          {filteredProducts.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              cart={cart}
+              setCart={setCart}
+            />
+          ))}
         </div>
         {showNoMatchCard && (
-           <Card
-           ref={noMatchCardRef}
-           className="product-card no-match-card"
-           sx={{
-             width: "100%",
-             padding: "2rem",
-             background: "linear-gradient(to right, rgba(238, 176, 61, 0.5), rgba(194, 118, 63, 0.5), rgba(135, 72, 57, 0.5), rgba(69, 37, 39, 0.5), rgba(0, 0, 0, 0.5))",
-             color: "#fff",
-             borderRadius: "8px",
-             boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.3)", /* Increased box shadow */
-             animation: "fadeIn 1s ease-in-out",
-           }}
+          <Card
+            ref={noMatchCardRef}
+            className="product-card no-match-card"
+            sx={{
+              width: "100%",
+              padding: "2rem",
+              background:
+                "linear-gradient(to right, rgba(238, 176, 61, 0.5), rgba(194, 118, 63, 0.5), rgba(135, 72, 57, 0.5), rgba(69, 37, 39, 0.5), rgba(0, 0, 0, 0.5))",
+              color: "#fff",
+              borderRadius: "8px",
+              boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.3)",
+              animation: "fadeIn 1s ease-in-out",
+            }}
           >
-           <CardContent>
-             <Typography
-               gutterBottom
-               variant="h5"
-               component="div"
-               className="product-title"
-               sx={{
-                 fontFamily: "monospace",
-                 fontSize: "24px", /* Increased text size */
-                 textAlign: "center",
-                 opacity: 0,
-                 animation: "fadeInText 3s ease-in-out forwards",
-                 textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)", /* Added text shadow */
-                 color: "black", /* Changed font color for contrast */
-                 WebkitTextStroke: "0.5px black", /* Added glow effect */
-               }}
-             >
-               No Items matched your Search !! 😔🔍
-             </Typography>
-           </CardContent>
+            <CardContent>
+              <Typography
+                gutterBottom
+                variant="h5"
+                component="div"
+                className="product-title"
+                sx={{
+                  fontFamily: "monospace",
+                  fontSize: "24px",
+                  textAlign: "center",
+                  opacity: 0,
+                  animation: "fadeInText 3s ease-in-out forwards",
+                  textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+                  color: "black",
+                  WebkitTextStroke: "0.5px black",
+                }}
+              >
+                No Items matched your Search !! 😔🔍
+              </Typography>
+            </CardContent>
           </Card>
         )}
       </div>
     </div>
   );
 };
-
 export default Products;
