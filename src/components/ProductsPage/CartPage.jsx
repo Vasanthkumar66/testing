@@ -19,7 +19,7 @@ import logo from "../HomePage/Headers/header.png";
 import Tooltip from "@mui/material/Tooltip";
 import Zoom from "@mui/material/Zoom";
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
-
+import Footer from "../HomePage/Footers/Footer";
 const ProductCard = ({ product, removeFromCart }) => {
   const { id, title, price, description, images } = product;
 
@@ -394,6 +394,7 @@ const CartPage = () => {
         )}
         </div>
       </div>
+      <Footer/>
     </div>
   );
 };

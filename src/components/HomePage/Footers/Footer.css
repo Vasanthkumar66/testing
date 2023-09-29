@@ -1,0 +1,33 @@
+.logo-container,
+.contact-us,
+.connect {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.connect-icon
+{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.cicon:hover
+{
+  color: #eeb03d;
+}
+
+.slogan {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.company-logo {
+  width: 120px;
+}

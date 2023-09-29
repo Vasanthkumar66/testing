@@ -21,8 +21,9 @@ import Tooltip from "@mui/material/Tooltip";
 import Zoom from "@mui/material/Zoom";
 import logo from "../HomePage/Headers/header.png";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import "./Products.css";
 import { useNavigate } from "react-router-dom";
+import Footer from "../HomePage/Footers/Footer";
+import "./Products.css";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -149,10 +150,10 @@ const ProductCard = ({ product, cart, setCart }) => {
                 color: "#eeb03d",
                 marginTop: "21px",
                 backgroundColor: "rgba(0, 0, 0, 0.7)",
-                transition: "color 0.3s, background-color 0.3s", 
+                transition: "color 0.3s, background-color 0.3s",
                 "&:hover": {
-                  color: "rgba(0, 0, 0, 0.7)", 
-                  backgroundColor: "#eeb03d", 
+                  color: "rgba(0, 0, 0, 0.7)",
+                  backgroundColor: "#eeb03d",
                 },
               }}
             >
@@ -160,7 +161,7 @@ const ProductCard = ({ product, cart, setCart }) => {
             </IconButton>
           </Tooltip>
         </div>
-        {typeof quantity === "undefined" ? (
+        {parseInt(quantity) > 13 ? (
           <Typography
             variant="body1"
             color="green"
@@ -168,6 +169,15 @@ const ProductCard = ({ product, cart, setCart }) => {
           >
             <VerifiedIcon sx={{ fontSize: "13px", marginTop: "12px" }} />
             <strong> In Stock</strong>
+          </Typography>
+        ) : parseInt(quantity) === 0 ? (
+          <Typography
+            variant="body1"
+            color="red"
+            className="product-availability"
+          >
+            <VerifiedIcon sx={{ fontSize: "13px", marginTop: "12px" }} />
+            <strong> Out of Stock !!</strong>
           </Typography>
         ) : (
           <Typography
@@ -223,16 +233,20 @@ const Products = () => {
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
     setCart(storedCart);
-    fetch("https://api.escuelajs.co/api/v1/products")
-      .then((response) => response.json())
-      .then((data) => {
-        const localStorageItems =
-          JSON.parse(localStorage.getItem("items")) || [];
-        const mergedProducts = [...localStorageItems, ...data];
-        setProducts(mergedProducts);
-        setFilteredProducts(mergedProducts);
-      })
-      .catch((error) => console.error("Error fetching data:", error));
+    const localStorageItems = JSON.parse(localStorage.getItem("items")) || [];
+    const mergedProducts = [...localStorageItems];
+    setProducts(mergedProducts);
+    setFilteredProducts(mergedProducts);
+    // fetch("https://api.escuelajs.co/api/v1/products")
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     const localStorageItems =
+    //       JSON.parse(localStorage.getItem("items")) || [];
+    //     const mergedProducts = [...localStorageItems, ...data];
+    //     setProducts(mergedProducts);
+    //     setFilteredProducts(mergedProducts);
+    //   })
+    //   .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
   const handleSearch = () => {
@@ -428,6 +442,7 @@ const Products = () => {
           </Card>
         )}
       </div>
+      <Footer/>
     </div>
   );
 };

@@ -26,12 +26,9 @@ const CustomerPage = () => {
   const [effVar, setEffVar] = useState(true);
   const fullText =
     "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
-
-  // Sample data for users and products
   const users = JSON.parse(localStorage.getItem("users")) || [];
   const products = JSON.parse(localStorage.getItem("items")) || [];
 
-  // Function to calculate the total cost of products for a user
   const calculateTotalCost = (user) => {
     const boughtProductIds = user.boughtProducts || [];
     const totalCost = boughtProductIds.reduce((acc, productId) => {
@@ -41,7 +38,6 @@ const CustomerPage = () => {
     return totalCost.toFixed(2);
   };
 
-  // Function to get the names of products a user bought
   const getBoughtProductNames = (user) => {
     const boughtProductIds = user.boughtProducts || [];
     const boughtProductNames = boughtProductIds.map((productId) => {
@@ -57,7 +53,6 @@ const CustomerPage = () => {
       const product = products.find((p) => p.id === productId);
       return product ? product.images : [];
     });
-    // Flatten the array of image arrays and remove any empty arrays
     return boughtProductImages.flat().filter((image) => image.length > 0);
   };
 
@@ -259,13 +254,12 @@ const CustomerPage = () => {
                     )}
                   </div>
                   <div className="cst-product-small-card-container">
-                  {getBoughtProductImages(user).map((img, index) => (
+                    {getBoughtProductImages(user).map((img, index) => (
                       <div className="cst-small-product-card" key={index}>
                         <img src={img} alt={`Product ${index}`} />
                       </div>
-                    ))
-                  }
-                </div>
+                    ))}
+                  </div>
                 </Typography>
                 <Typography
                   variant="body1"
@@ -282,7 +276,6 @@ const CustomerPage = () => {
                     Savings: ₹{calculateTotalCost(user) * (25 / 100).toFixed(2)}
                   </strong>
                 </div>
-
               </CardContent>
             </Card>
           ))}

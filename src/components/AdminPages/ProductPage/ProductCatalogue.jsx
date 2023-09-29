@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
-import BadgeIcon from '@mui/icons-material/Badge';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
-import { useAuth } from "../../AuthPages/useAuth"
+import BadgeIcon from "@mui/icons-material/Badge";
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
+import { useAuth } from "../../AuthPages/useAuth";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import VerifiedIcon from "@mui/icons-material/Verified";
@@ -15,8 +15,8 @@ import { styled, alpha } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import { Link } from "react-router-dom";
 import { Button } from "@mui/material";
-import InventoryIcon from '@mui/icons-material/Inventory';
-import logo from "../../HomePage/Headers/header.png"
+import InventoryIcon from "@mui/icons-material/Inventory";
+import logo from "../../HomePage/Headers/header.png";
 import PersonIcon from "@mui/icons-material/Person";
 import "./ProductCatalogue.css";
 
@@ -107,7 +107,7 @@ const ProductCard = ({ product, cart, setCart }) => {
           </span>
           <span className="head">
             {" "}
-            M.R.P:<s>{parseInt(price) + parseInt(price)*(25/100)}</s>
+            M.R.P:<s>{parseInt(price) + parseInt(price) * (25 / 100)}</s>
           </span>
           <span className="tail"> (25%off)</span>
         </Typography>
@@ -120,7 +120,7 @@ const ProductCard = ({ product, cart, setCart }) => {
         >
           <div className="product-rating">{generateStars(3)}</div>
         </div>
-        {typeof quantity === "undefined" ? (
+        {parseInt(quantity) > 13 ? (
           <Typography
             variant="body1"
             color="green"
@@ -128,6 +128,15 @@ const ProductCard = ({ product, cart, setCart }) => {
           >
             <VerifiedIcon sx={{ fontSize: "13px", marginTop: "12px" }} />
             <strong> In Stock</strong>
+          </Typography>
+        ) : parseInt(quantity) === 0 ? (
+          <Typography
+            variant="body1"
+            color="red"
+            className="product-availability"
+          >
+            <VerifiedIcon sx={{ fontSize: "13px", marginTop: "12px" }} />
+            <strong> Out of Stock !!</strong>
           </Typography>
         ) : (
           <Typography
@@ -143,7 +152,6 @@ const ProductCard = ({ product, cart, setCart }) => {
     </Card>
   );
 };
-
 
 const generateStars = (rating) => {
   const maxStars = 5;
@@ -176,10 +184,9 @@ const ProductCatalogue = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [showNoMatchCard, setShowNoMatchCard] = useState(false);
   const noMatchCardRef = useRef(null);
-  const {adminLogout} = useAuth()
+  const { adminLogout } = useAuth();
   const [cart, setCart] = useState([]);
 
-  
   useEffect(() => {
     let currentIndex = 0;
     const typingInterval = setInterval(() => {
@@ -207,16 +214,21 @@ const ProductCatalogue = () => {
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
     setCart(storedCart);
-    fetch("https://api.escuelajs.co/api/v1/products")
-      .then((response) => response.json())
-      .then((data) => {
-        const localStorageItems =
+    const localStorageItems =
           JSON.parse(localStorage.getItem("items")) || [];
-        const mergedProducts = [...localStorageItems, ...data];
+        const mergedProducts = [...localStorageItems];
         setProducts(mergedProducts);
         setFilteredProducts(mergedProducts);
-      })
-      .catch((error) => console.error("Error fetching data:", error));
+    // fetch("https://api.escuelajs.co/api/v1/products")
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     const localStorageItems =
+    //       JSON.parse(localStorage.getItem("items")) || [];
+    //     const mergedProducts = [...localStorageItems, ...data];
+    //     setProducts(mergedProducts);
+    //     setFilteredProducts(mergedProducts);
+    //   })
+    //   .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
   const handleSearch = () => {
@@ -295,7 +307,10 @@ const ProductCatalogue = () => {
               />
             </Search>
             <div sx={{ display: "flex", alignItems: "center", mt: "8px" }}>
-            <Link to="/employee-page" style={{ textDecoration: "none", marginRight: "8px" }}>
+              <Link
+                to="/employee-page"
+                style={{ textDecoration: "none", marginRight: "8px" }}
+              >
                 <Button
                   className="mobile-button button"
                   sx={{
@@ -311,7 +326,10 @@ const ProductCatalogue = () => {
                   </Typography>
                 </Button>
               </Link>
-              <Link to="/customer-page" style={{ textDecoration: "none", marginRight: "8px" }}>
+              <Link
+                to="/customer-page"
+                style={{ textDecoration: "none", marginRight: "8px" }}
+              >
                 <Button
                   className="mobile-button button"
                   sx={{
@@ -355,7 +373,7 @@ const ProductCatalogue = () => {
                     marginLeft: "13px",
                     marginTop: "7px",
                   }}
-                  onClick={()=>adminLogout()}
+                  onClick={() => adminLogout()}
                 >
                   <PersonIcon />
                   <Typography variant="body2" sx={{ paddingLeft: "8px" }}>

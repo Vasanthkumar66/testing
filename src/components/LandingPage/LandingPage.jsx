@@ -21,6 +21,7 @@ import { Link } from "react-router-dom";
 import "./LandingPage.css";
 import car1 from "../../Assets/car1.jpg";
 import car2 from "../../Assets/car2.jpg";
+import Footer from "../HomePage/Footers/Footer";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -187,14 +188,17 @@ const LandingPage = () => {
   }, []);
   useEffect(() => {
     const localProducts = JSON.parse(localStorage.getItem("items")) || [];
-    fetch("https://api.escuelajs.co/api/v1/products")
-      .then((response) => response.json())
-      .then((data) => {
-        const mergedProducts = [...localProducts, ...data];
-        setProducts(mergedProducts);
-        setFilteredProducts(mergedProducts);
-      })
-      .catch((error) => console.error("Error fetching data:", error));
+    const mergedProducts = [...localProducts];
+    setProducts(mergedProducts);
+    setFilteredProducts(mergedProducts);
+    // fetch("https://api.escuelajs.co/api/v1/products")
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     const mergedProducts = [...localProducts, ...data];
+    //     setProducts(mergedProducts);
+    //     setFilteredProducts(mergedProducts);
+    //   })
+    //   .catch((error) => console.error("Error fetching data:", error));
   }, []);
   const handleSearch = () => {
     const lowercasedSearchInput = searchInput.toLowerCase().trim(); // Convert search input to lowercase
@@ -422,6 +426,7 @@ const LandingPage = () => {
           )}
         </div>
       </Link>
+      <Footer/>
     </div>
   );
 };

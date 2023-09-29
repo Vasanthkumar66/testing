@@ -14,8 +14,8 @@
 
 @media (max-width: 600px) {
   .mobile-button {
-    font-size: 14px; /* Adjust the font size as needed */
-    padding: 8px 16px; /* Adjust the padding as needed */
+    font-size: 14px;
+    padding: 8px 16px;
   }
 }
 
@@ -40,12 +40,12 @@
 }
 
 .cst-product-card {
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Added transition property */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   margin: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center content horizontally */
+  align-items: center;
   max-width: 400px;
 }
 
@@ -85,26 +85,23 @@
   box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Define a class for the small product cards */
 .cst-small-product-card {
   display: inline-block;
   width: 40px;
   height: 40px;
   border: 1px solid #ccc;
   padding: 4px;
-  margin-right: 4px; /* Add margin between columns */
+  margin-right: 4px; 
 }
 
-/* Style the image inside the small product card */
 .cst-small-product-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* Adjust the container for small product cards */
 .cst-product-small-card-container {
   display: flex;
-  flex-wrap: wrap; /* Allow multiple rows */
+  flex-wrap: wrap;
   margin-top: 8px;
 }

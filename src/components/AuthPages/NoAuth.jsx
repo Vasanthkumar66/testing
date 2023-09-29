@@ -2,6 +2,7 @@ import React from "react";
 import { Typography } from "@mui/material";
 import CardContent from "@mui/material/CardContent";
 import Card from "@mui/material/Card";
+import Footer from "../HomePage/Footers/Footer";
 
 const NoAuth = () => {
   return (
@@ -40,6 +41,7 @@ const NoAuth = () => {
           </Typography>
         </CardContent>
       </Card>
+      <Footer/>
     </div>
   );
 };

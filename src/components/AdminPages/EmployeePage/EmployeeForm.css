@@ -1,0 +1,80 @@
+/* Styling for the employee form */
+.employee-form {
+    text-align: center;
+    padding: 20px;
+    margin: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+    background: linear-gradient(
+      to top,
+      #eeeeee,
+      #ebe6eb,
+      #ecdde3,
+      #eed5d5,
+      #ebcec3,
+      #ebcebb,
+      #e8cfb4,
+      #e2d0ae,
+      #e8d4af,
+      #edd8af,
+      #f3ddb0,
+      #f8e1b0
+    );
+  }
+  
+  .employee-form:hover {
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .form-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  /* Styling for the enroll button */
+  .emp-submit-button {
+    color: black !important;
+    background-color: #eeb03d !important; /* Default background color */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Transition effect */
+  
+    /* Center the button horizontally */
+    margin: 16px auto;
+    display: block;
+    padding: 10px 20px;
+    width: fit-content; /* Set width to fit content */
+  
+    /* Center text in button */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Change button color on hover */
+/* Change button color on hover */
+.emp-submit-button:hover {
+    background-color: black !important; /* Hover background color */
+    color: #eeb03d !important; /* Hover text color */
+}
+
+  
+  /* Styling for text fields */
+  .MuiTextField-root {
+    width: 100%; /* Set the width to 100% for all text fields */
+    margin-bottom: 16px; /* Add margin for spacing between fields */
+  }
+  
+  /* Adjust the width of the DatePicker input field */
+  .MuiFormControl-marginNormal {
+    width: 100%;
+  }
+  
+  /* Style the select input for Role */
+  .MuiFormControl-root {
+    width: 100%; /* Set the width to 100% for the select input */
+    margin-bottom: 16px; /* Add margin for spacing */
+  }
+  
+  .employee-list
+  {
+    margin-top: 20px;
+  }
