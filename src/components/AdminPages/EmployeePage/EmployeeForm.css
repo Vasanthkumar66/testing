@@ -76,5 +76,11 @@
   
   .employee-list
   {
+    margin-top: 35px;
+  }
+
+  .button-container
+  {
+    flex-direction: row;
     margin-top: 20px;
   }

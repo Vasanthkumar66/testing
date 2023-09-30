@@ -17,9 +17,11 @@ import "./SigninPage.css";
 import loginlogo from "../../Assets/login-logo.png";
 import bcrypt from "bcryptjs";
 import { useAuth } from "./useAuth";
-
+import {useDispatch} from 'react-redux'
+import { loginSuccess } from "../../Redux/actions/userAction";
 export default function SigninPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -42,9 +44,9 @@ export default function SigninPage() {
     try {
       const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
       const user = storedUsers.find((u) => u.email === formData.email);
-
       if (user && (await bcrypt.compare(formData.password, user.password))) {
-        login();
+        login();  
+        dispatch(loginSuccess(user))
         toast.success("Signed In successfully!!", {
           position: "top-right",
           autoClose: 2500,
@@ -54,7 +56,7 @@ export default function SigninPage() {
           draggable: true,
           theme: "colored",
         });
-        navigate("/products");
+        navigate("/products",{state:{user}});
       } else {
         toast.error("Invalid e-mail or password!!", {
           position: "top-right",

@@ -11,6 +11,7 @@ import InputBase from "@mui/material/InputBase";
 import { styled, alpha } from "@mui/material/styles";
 import LoginIcon from "@mui/icons-material/Login";
 import PersonIcon from "@mui/icons-material/Person";
+import Faqs from "./Faqs";
 import SearchIcon from "@mui/icons-material/Search";
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import Slider from "react-slick";
@@ -236,7 +237,7 @@ const LandingPage = () => {
       <Box sx={{ flexGrow: 1 }}>
         <AppBar
           position="static"
-          sx={{ backgroundColor: "black", height: "100%" }}
+          sx={{ backgroundColor: "black", height: "100px" }}
         >
           <Toolbar
             sx={{
@@ -426,6 +427,7 @@ const LandingPage = () => {
           )}
         </div>
       </Link>
+      <Faqs/>
       <Footer/>
     </div>
   );

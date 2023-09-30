@@ -9,7 +9,7 @@ import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
-import ShopIcon from '@mui/icons-material/Shop';
+import ShopIcon from "@mui/icons-material/Shop";
 import CardContent from "@mui/material/CardContent";
 import emptycart from "../../Assets/empty-cart.png";
 import CardMedia from "@mui/material/CardMedia";
@@ -18,7 +18,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import logo from "../HomePage/Headers/header.png";
 import Tooltip from "@mui/material/Tooltip";
 import Zoom from "@mui/material/Zoom";
-import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import Footer from "../HomePage/Footers/Footer";
 const ProductCard = ({ product, removeFromCart }) => {
   const { id, title, price, description, images } = product;
@@ -295,7 +295,8 @@ const CartPage = () => {
                 </Typography>
               </Button>
             </Link>
-            {cart.length >= 1 ? <Button
+            {cart.length >= 1 ? (
+              <Button
                 className="button"
                 sx={{
                   color: "black",
@@ -304,12 +305,15 @@ const CartPage = () => {
                 }}
                 onClick={() => setShowForm(!showForm)}
               >
-                <ShopIcon sx={{fontSize:"20px"}} />
+                <ShopIcon sx={{ fontSize: "20px" }} />
                 <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
-                 Purchase
+                  Purchase
                 </Typography>
-              </Button>:<></>}
-         
+              </Button>
+            ) : (
+              <></>
+            )}
+
             {cart.length >= 1 && (
               <div>
                 <Button
@@ -321,8 +325,15 @@ const CartPage = () => {
                   }}
                 >
                   <CurrencyRupeeIcon />
-                  <Typography variant="subtitle2" sx={{ paddingLeft: "5px", fontSize:"20px", paddingRight: "5px" }}>
-                  <strong>{totalPrice.toFixed(2)}</strong>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      paddingLeft: "5px",
+                      fontSize: "20px",
+                      paddingRight: "5px",
+                    }}
+                  >
+                    <strong>{totalPrice.toFixed(2)}</strong>
                   </Typography>
                 </Button>
               </div>
@@ -382,19 +393,19 @@ const CartPage = () => {
           )}
         </div>
         <div className="purchase-form">
-        {showForm && (
-         <PurchaseForm
-         selectedUser={selectedUser}
-         handleUserSelect={handleUserSelect}
-         cart={cart}
-         handleProductSelect={handleProductSelect}
-         handleSubmit={handleSubmit}
-         users={users}
-       />
-        )}
+          {showForm && (
+            <PurchaseForm
+              selectedUser={selectedUser}
+              handleUserSelect={handleUserSelect}
+              cart={cart}
+              handleProductSelect={handleProductSelect}
+              handleSubmit={handleSubmit}
+              users={users}
+            />
+          )}
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 };

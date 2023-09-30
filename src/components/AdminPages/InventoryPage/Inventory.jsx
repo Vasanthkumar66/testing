@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import logo from "../../HomePage/Headers/header.png"
-import CategoryIcon from '@mui/icons-material/Category';
-import {AppBar} from "@mui/material";
-import {Toolbar} from "@mui/material";
-import BadgeIcon from '@mui/icons-material/Badge';
+import logo from "../../HomePage/Headers/header.png";
+import CategoryIcon from "@mui/icons-material/Category";
+import { AppBar } from "@mui/material";
+import { Toolbar } from "@mui/material";
+import BadgeIcon from "@mui/icons-material/Badge";
 import { Link } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import { useAuth } from "../../AuthPages/useAuth";
 import {
   Typography,
@@ -35,11 +35,12 @@ const Inventory = () => {
   });
   const [typedText, setTypedText] = useState("");
   const delay = 75;
-  const {adminLogout} = useAuth()
+  const { adminLogout } = useAuth();
   const [effVar, setEffVar] = useState(true);
-  const fullText ="\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
-  const [selectedProduct, setSelectedProduct] = useState(""); 
-  const [inventoryItems, setInventoryItems] = useState([]); 
+  const fullText =
+    "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
+  const [selectedProduct, setSelectedProduct] = useState("");
+  const [inventoryItems, setInventoryItems] = useState([]);
 
   useEffect(() => {
     let currentIndex = 0;
@@ -115,6 +116,20 @@ const Inventory = () => {
     setInventoryItems(updatedInventory);
   };
 
+  const clearAddItemFields = () => {
+    setFormData({
+      title: "",
+      price: 0,
+      description: "",
+      images: [],
+      quantity: 0,
+    });
+  };
+
+  const clearRemoveItemField = () => {
+    setSelectedProduct("");
+  };
+
   useEffect(() => {
     const existingItems = JSON.parse(localStorage.getItem("items")) || [];
     setInventoryItems(existingItems);
@@ -122,7 +137,7 @@ const Inventory = () => {
 
   return (
     <>
-     <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ flexGrow: 1 }}>
         <AppBar
           position="static"
           sx={{ backgroundColor: "black", height: "100px" }}
@@ -154,7 +169,10 @@ const Inventory = () => {
               <span className="head-title">{typedText}</span>
             </Typography>
             <div sx={{ display: "flex", alignItems: "center", mt: "8px" }}>
-            <Link to="/employee-page" style={{ textDecoration: "none", marginRight: "8px" }}>
+              <Link
+                to="/employee-page"
+                style={{ textDecoration: "none", marginRight: "8px" }}
+              >
                 <Button
                   className="mobile-button button"
                   sx={{
@@ -170,7 +188,10 @@ const Inventory = () => {
                   </Typography>
                 </Button>
               </Link>
-              <Link to="/customer-page" style={{ textDecoration: "none", marginRight: "8px" }}>
+              <Link
+                to="/customer-page"
+                style={{ textDecoration: "none", marginRight: "8px" }}
+              >
                 <Button
                   className="mobile-button button"
                   sx={{
@@ -191,13 +212,13 @@ const Inventory = () => {
                 style={{ textDecoration: "none", marginRight: "8px" }}
               >
                 <Button
-                   className="mobile-button button"
-                   sx={{
-                     color: "black",
-                     backgroundColor: "#eeb03d",
-                     marginLeft: "13px",
-                     marginTop: "7px",
-                   }}
+                  className="mobile-button button"
+                  sx={{
+                    color: "black",
+                    backgroundColor: "#eeb03d",
+                    marginLeft: "13px",
+                    marginTop: "7px",
+                  }}
                 >
                   <CategoryIcon />
                   <Typography variant="body2" sx={{ paddingLeft: "10px" }}>
@@ -212,8 +233,9 @@ const Inventory = () => {
                     color: "black",
                     backgroundColor: "#eeb03d",
                     marginLeft: "13px",
-                    marginTop: "7px"}}
-                    onClick={()=>adminLogout()}
+                    marginTop: "7px",
+                  }}
+                  onClick={() => adminLogout()}
                 >
                   <PersonIcon />
                   <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
@@ -233,7 +255,6 @@ const Inventory = () => {
             "linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)",
           WebkitBackgroundClip: "text",
           color: "transparent",
-          marginBottom: "5px",
           marginTop: "20px",
           textAlign: "center",
           textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)", // Add a shadow here
@@ -280,7 +301,7 @@ const Inventory = () => {
                   fullWidth
                   label="Image URLs (comma-separated)"
                   name="images"
-                  value={formData.images.join(",")} 
+                  value={formData.images.join(",")}
                   onChange={handleInputChange}
                 />
               </Grid>
@@ -310,6 +331,23 @@ const Inventory = () => {
                   onClick={handleAddItem}
                 >
                   Add Item
+                </Button>
+                <Button
+                   sx={{
+                    marginTop: "12px",
+                    marginLeft: "12px",
+                    color: "black",
+                    backgroundColor: "#eeb03d",
+                    "&:hover": {
+                      backgroundColor: "black",
+                      color: "#eeb03d",
+                    },
+                  }}
+                  variant="contained"
+                  color="primary"
+                  onClick={clearAddItemFields} 
+                >
+                  Clear Selection
                 </Button>
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -343,6 +381,23 @@ const Inventory = () => {
                   onClick={handleRemoveItem}
                 >
                   Remove Item
+                </Button>
+                <Button
+                   sx={{
+                    marginTop: "12px",
+                    marginLeft: "12px",
+                    color: "black",
+                    backgroundColor: "#eeb03d",
+                    "&:hover": {
+                      backgroundColor: "black",
+                      color: "#eeb03d",
+                    },
+                  }}
+                  variant="contained"
+                  color="primary"
+                  onClick={clearRemoveItemField} 
+                >
+                  Clear Selection
                 </Button>
               </Grid>
             </Grid>

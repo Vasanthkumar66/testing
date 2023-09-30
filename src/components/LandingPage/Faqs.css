@@ -1,0 +1,10 @@
+.faq-answer {
+    background-color: #eeb03d;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  

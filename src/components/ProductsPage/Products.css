@@ -113,6 +113,12 @@
   background-color: black;
 }
 
+.profile-icon:hover
+{
+  color: #eeb03d;
+  background-color: black;
+}
+
 @keyframes fadeInText {
   from {
     opacity: 0;

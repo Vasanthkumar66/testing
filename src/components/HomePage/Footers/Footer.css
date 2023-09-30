@@ -8,16 +8,14 @@
   color: white;
 }
 
-.connect-icon
-{
+.connect-icon {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
 }
 
-.cicon:hover
-{
+.cicon:hover {
   color: #eeb03d;
 }
 
@@ -30,4 +28,21 @@
 
 .company-logo {
   width: 120px;
+}
+
+.terms-and-conditions,
+.privacy-policy,
+.quick-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.terms-and-conditions h6,
+.privacy-policy h6,
+.quick-links h6 {
+  font-size: 18px;
+  margin-bottom: 10px;
 }

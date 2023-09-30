@@ -1,4 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
@@ -23,8 +31,11 @@ import logo from "../HomePage/Headers/header.png";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useNavigate } from "react-router-dom";
 import Footer from "../HomePage/Footers/Footer";
+import { v4 as uuidv4 } from "uuid";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import "./Products.css";
-
+import Faqs from "../LandingPage/Faqs";
+import { useLocation } from "react-router-dom";
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -68,8 +79,9 @@ const ProductCard = ({ product, cart, setCart }) => {
   const { id, title, price, description, images, quantity } = product;
 
   const addToCart = (product) => {
-    setCart([...cart, product]);
-    localStorage.setItem("cart", JSON.stringify([...cart, product]));
+    const productWithId = { ...product, id: uuidv4() };
+    setCart([...cart, productWithId]);
+    localStorage.setItem("cart", JSON.stringify([...cart, productWithId]));
     toast.info(`${product.title} added to the cart 😉`, {
       position: "top-right",
       autoClose: 2000,
@@ -81,6 +93,7 @@ const ProductCard = ({ product, cart, setCart }) => {
       theme: "colored",
     });
   };
+
   return (
     <Card
       className="product-card"
@@ -217,6 +230,7 @@ const generateStars = (rating) => {
 
 const Products = () => {
   const [typedText, setTypedText] = useState("");
+  const location = useLocation();
   const fullText =
     "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
   const delay = 75;
@@ -228,8 +242,16 @@ const Products = () => {
   const noMatchCardRef = useRef(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const [selectedSortOption, setSelectedSortOption] = useState("");
   const [cart, setCart] = useState([]);
-
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [userData, setUserData] = useState({
+    username: location.state.user.username,
+    age: location.state.user.age,
+    country: location.state.user.country,
+    email: location.state.user.email,
+  });
+  const [isEditing, setIsEditing] = useState(false);
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
     setCart(storedCart);
@@ -248,6 +270,8 @@ const Products = () => {
     //   })
     //   .catch((error) => console.error("Error fetching data:", error));
   }, []);
+
+  console.log(location);
 
   const handleSearch = () => {
     if (searchInput.trim() === "") {
@@ -278,6 +302,137 @@ const Products = () => {
     setTimeout(() => {
       handleSearch();
     }, 1000);
+  };
+
+  const handleEditProfile = () => {
+    // Populate dialog fields with existing user data
+    setUserData({
+      username: location.state.user.username,
+      age: location.state.user.age,
+      country: location.state.user.country,
+      email: location.state.user.email,
+    });
+
+    setIsEditing(true); // Enable editing when "Edit" button is clicked
+    setIsProfileDialogOpen(true);
+  };
+
+  const renderProfileDialog = () => {
+    return (
+      <Dialog
+        open={isProfileDialogOpen}
+        onClose={() => setIsProfileDialogOpen(false)}
+      >
+        <DialogTitle>View Profile</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Click "Edit" to update your profile information:
+          </DialogContentText>
+          <TextField
+            sx={{
+              marginTop: "20px",
+            }}
+            label="Username"
+            fullWidth
+            value={userData.username}
+            onChange={(e) =>
+              setUserData({ ...userData, username: e.target.value })
+            }
+            disabled={!isEditing} // Disable if not in editing mode
+          />
+          <TextField
+            sx={{
+              marginTop: "20px",
+            }}
+            label="Email"
+            fullWidth
+            value={userData.email}
+            onChange={(e) =>
+              setUserData({ ...userData, email: e.target.value })
+            }
+            disabled // Disable if not in editing mode
+          />
+          <TextField
+            sx={{
+              marginTop: "20px",
+            }}
+            label="Country"
+            fullWidth
+            value={userData.country}
+            onChange={(e) =>
+              setUserData({ ...userData, country: e.target.value })
+            }
+            disabled={!isEditing} // Disable if not in editing mode
+          />
+          <TextField
+            sx={{
+              marginTop: "20px",
+            }}
+            label="No. of Purchases"
+            fullWidth
+            value={location.state.user.boughtProducts.length}
+            disabled // Always disabled for "No. of Purchases"
+          />
+        </DialogContent>
+        <DialogActions>
+          {!isEditing && ( // Show "Edit" button if not in editing mode
+            <Button onClick={handleEditProfile}>Edit</Button>
+          )}
+          {isEditing && ( // Show "Save Changes" and "Cancel" buttons in editing mode
+            <>
+              <Button onClick={handleSaveChanges}>Save Changes</Button>
+              <Button onClick={() => setIsProfileDialogOpen(false)}>Cancel</Button>
+            </>
+          )}
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
+
+
+
+  const handleSaveChanges = () => {
+    // Find the user with the same email ID in localStorage
+    const usersFromLocalStorage =
+      JSON.parse(localStorage.getItem("users")) || [];
+    const updatedUsers = usersFromLocalStorage.map((user) => {
+      if (user.email === userData.email) {
+        // Update user data
+        return {
+          ...user,
+          username: userData.username,
+          country: userData.country,
+        };
+      }
+      return user;
+    });
+
+    // Update localStorage with the modified data
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+
+    toast.success("User updated Successfully")
+    setIsProfileDialogOpen(false);
+    setIsEditing(!isEditing)
+  };
+
+  const handleSortChange = (event) => {
+    const sortOption = event.target.value;
+    let sortedProducts = [...filteredProducts];
+
+    if (sortOption === "lowToHigh") {
+      sortedProducts.sort((a, b) => a.price - b.price);
+    } else if (sortOption === "highToLow") {
+      sortedProducts.sort((a, b) => b.price - a.price);
+    }
+
+    setFilteredProducts(sortedProducts);
+  };
+
+  const handleClearFilter = () => {
+    setFilteredProducts(products);
+    setSearchInput("");
+    setSelectedSortOption("");
   };
 
   const handleCartClick = () => {
@@ -346,7 +501,27 @@ const Products = () => {
                 <ShoppingCartIcon sx={{ fontSize: "24px" }} />
               </IconButton>
             </Tooltip>
-
+            <Tooltip
+              TransitionComponent={Zoom}
+              placement="bottom"
+              title="View Profile"
+            >
+              <IconButton
+                className="profile-icon"
+                sx={{
+                  backgroundColor: "#eeb03d",
+                  borderRadius: "50%",
+                  padding: "8px",
+                  color: "black",
+                  marginLeft: "20px",
+                }}
+                onClick={() => {
+                  setIsProfileDialogOpen(!isProfileDialogOpen);
+                }}
+              >
+                <ManageAccountsIcon sx={{ fontSize: "24px" }} />
+              </IconButton>
+            </Tooltip>
             <Link to="/" style={{ textDecoration: "none" }}>
               <Button
                 className="button"
@@ -377,6 +552,67 @@ const Products = () => {
           </Toolbar>
         </AppBar>
       </Box>
+      {isProfileDialogOpen ? renderProfileDialog() : <></>}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          marginTop: "20px",
+          marginRight: "20px",
+        }}
+      >
+        <label
+          htmlFor="sort"
+          style={{
+            fontFamily: "sans-serif",
+            marginRight: "10px",
+            color: "black",
+          }}
+        >
+          Sort By:
+        </label>
+        <select
+          id="sort"
+          name="sort"
+          onChange={(event) => {
+            handleSortChange(event);
+            setSelectedSortOption(event.target.value);
+          }}
+          value={selectedSortOption}
+          style={{
+            padding: "8px",
+            backgroundColor: "transparent",
+            border: "1px solid #eeb03d",
+            color: "black",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          <option value="" disabled>
+            Select Option
+          </option>
+          <option value="lowToHigh">Price Low to High</option>
+          <option value="highToLow">Price High to Low</option>
+        </select>
+
+        <Button
+          className="button"
+          sx={{
+            color: "black",
+            backgroundColor: "#eeb03d",
+            marginLeft: "15px",
+            "&:hover": {
+              color: "#eeb03d",
+              backgroundColor: "black",
+            },
+          }}
+          onClick={handleClearFilter}
+        >
+          Clear Filter
+        </Button>
+      </div>
+
       <Typography
         variant="h4"
         sx={{
@@ -442,7 +678,8 @@ const Products = () => {
           </Card>
         )}
       </div>
-      <Footer/>
+      <Faqs />
+      <Footer />
     </div>
   );
 };

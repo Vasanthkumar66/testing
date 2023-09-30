@@ -6,7 +6,7 @@
 }
 
 .inv-form-container {
-  margin-top: 24px;
+  margin-top: 25px;
   background: linear-gradient(
     to top,
     rgba(238, 238, 238, 0.5),
@@ -22,7 +22,7 @@
     rgba(243, 221, 176, 0.5),
     rgba(248, 225, 176, 0.5)
   );
-  padding: 20px;
+  padding: 25px;
   border-radius: 8px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease-in-out;

@@ -41,7 +41,6 @@ const NoAuth = () => {
           </Typography>
         </CardContent>
       </Card>
-      <Footer/>
     </div>
   );
 };

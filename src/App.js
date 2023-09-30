@@ -4,8 +4,15 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./components/AuthPages/useAuth";
 import { useEffect } from "react";
+import { store } from "./Redux/stores";
+import { Provider } from "react-redux";
 function App() {
-  useEffect(()=>{localStorage.setItem('admin', JSON.stringify([{ email: "admin@iamneo.ai", password: "qwedsa" }]));},[])
+  useEffect(() => {
+    localStorage.setItem(
+      "admin",
+      JSON.stringify([{ email: "admin@iamneo.ai", password: "qwedsa" }])
+    );
+  }, []);
   return (
     <AuthProvider>
       <div className="App">
@@ -21,7 +28,9 @@ function App() {
           pauseOnHover
           theme="colored"
         />
-        <HomePage />
+        <Provider store={store}>
+          <HomePage />
+        </Provider>
       </div>
     </AuthProvider>
   );
