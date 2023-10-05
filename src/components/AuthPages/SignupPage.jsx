@@ -24,6 +24,7 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
     country: "",
+    contact: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -41,6 +42,18 @@ export default function SignupPage() {
     event.preventDefault();
 
     try {
+      if (formData.password.length < 8) {
+        toast.warning("Password must be greater than 8 characters", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          theme: "colored",
+        });
+        return;
+      }
       if (formData.password !== formData.confirmPassword) {
         toast.warning("Password and Confirm password do not match", {
           position: "top-right",
@@ -60,27 +73,47 @@ export default function SignupPage() {
         email: formData.email,
         password: hashedPassword,
         country: formData.country,
+        contact: formData.contact,
       };
+      //const userExists = 0;
+      // const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+      // const userExists = storedUsers.find(
+      //   (user) => user.email === formData.email
+      // );
 
-      const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-      const userExists = storedUsers.find(
-        (user) => user.email === formData.email
-      );
+      // if (userExists) {
+      //   toast.warning("User with this e-mail already exists!!", {
+      //     position: "top-right",
+      //     autoClose: 3000,
+      //     hideProgressBar: false,
+      //     closeOnClick: true,
+      //     pauseOnHover: false,
+      //     draggable: true,
+      //     theme: "colored",
+      //   });
+      // } else {
+        const requestBody = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newUser),
+        };
 
-      if (userExists) {
-        toast.warning("User with this e-mail already exists!!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          theme: "colored",
-        });
-      } else {
-        storedUsers.push(newUser);
-        localStorage.setItem("users", JSON.stringify(storedUsers));
-
+        // Send a POST request to the server
+        const response = await fetch("http://localhost:8052/add", requestBody);
+        const responsedata=await response.text()
+        //console.log(responsedata)
+        if (responsedata==="User with this email already exists") {
+          toast.warning("User with this e-mail already exists!!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            theme: "colored",
+          });}else{
         toast.success("User created successfully!!", {
           position: "top-right",
           autoClose: 3000,
@@ -98,8 +131,7 @@ export default function SignupPage() {
           country: "",
         });
         navigate("/login");
-      }
-    } catch (error) {
+    } }catch (error) {
       console.error("Error:", error);
       toast.error("An error occurred while processing your request", {
         position: "top-right",
@@ -239,6 +271,16 @@ export default function SignupPage() {
                   label="Country"
                   id="country"
                   value={formData.country}
+                  onChange={handleInputChange}
+                />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="contact"
+                  label="Contact"
+                  id="contact"
+                  value={formData.contact}
                   onChange={handleInputChange}
                 />
                 <Button

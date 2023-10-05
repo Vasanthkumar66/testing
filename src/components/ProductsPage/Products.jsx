@@ -76,7 +76,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 const ProductCard = ({ product, cart, setCart }) => {
-  const { id, title, price, description, images, quantity } = product;
+  const { title, price, description, image, quantity } = product;
 
   const addToCart = (product) => {
     const productWithId = { ...product, id: uuidv4() };
@@ -106,7 +106,7 @@ const ProductCard = ({ product, cart, setCart }) => {
     >
       <CardMedia
         className="product-image"
-        image={images[0]}
+        image={image}
         title={title}
         children={<div></div>}
       />
@@ -253,12 +253,24 @@ const Products = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCart(storedCart);
-    const localStorageItems = JSON.parse(localStorage.getItem("items")) || [];
-    const mergedProducts = [...localStorageItems];
-    setProducts(mergedProducts);
-    setFilteredProducts(mergedProducts);
+    const fetchdata = async()=>{
+      const response = await fetch("http://localhost:8052/allproducts",{
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      })
+      const respdata= await response.json()
+           setProducts(respdata);
+           setFilteredProducts(respdata);
+    }
+    fetchdata()
+    // const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    // setCart(storedCart);
+    // const localStorageItems = JSON.parse(localStorage.getItem("items")) || [];
+    // const mergedProducts = [...localStorageItems];
+    // setProducts(mergedProducts);
+    // setFilteredProducts(mergedProducts);
     // fetch("https://api.escuelajs.co/api/v1/products")
     //   .then((response) => response.json())
     //   .then((data) => {
@@ -271,7 +283,7 @@ const Products = () => {
     //   .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
-  console.log(location);
+  //console.log(location);
 
   const handleSearch = () => {
     if (searchInput.trim() === "") {

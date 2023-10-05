@@ -59,8 +59,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const ProductCard = ({ product, cart, setCart }) => {
-  const { title, price, description, images, quantity } = product;
+const ProductCard = ({ product }) => {
+  const { title, price, description, image, quantity } = product;
 
   return (
     <Card
@@ -74,7 +74,7 @@ const ProductCard = ({ product, cart, setCart }) => {
     >
       <CardMedia
         className="product-image"
-        image={images[0]}
+        image={image}
         title={title}
         children={<div></div>}
       />
@@ -185,7 +185,6 @@ const ProductCatalogue = () => {
   const [showNoMatchCard, setShowNoMatchCard] = useState(false);
   const noMatchCardRef = useRef(null);
   const { adminLogout } = useAuth();
-  const [cart, setCart] = useState([]);
 
   useEffect(() => {
     let currentIndex = 0;
@@ -211,24 +210,19 @@ const ProductCatalogue = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCart(storedCart);
-    const localStorageItems =
-          JSON.parse(localStorage.getItem("items")) || [];
-        const mergedProducts = [...localStorageItems];
-        setProducts(mergedProducts);
-        setFilteredProducts(mergedProducts);
-    // fetch("https://api.escuelajs.co/api/v1/products")
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     const localStorageItems =
-    //       JSON.parse(localStorage.getItem("items")) || [];
-    //     const mergedProducts = [...localStorageItems, ...data];
-    //     setProducts(mergedProducts);
-    //     setFilteredProducts(mergedProducts);
-    //   })
-    //   .catch((error) => console.error("Error fetching data:", error));
+  useEffect( () => {
+    const fetchdata = async()=>{
+    const response = await fetch("http://localhost:8052/allproducts",{
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    })
+    const respdata= await response.json()
+         setProducts(respdata);
+         setFilteredProducts(respdata);
+  }
+  fetchdata()
   }, []);
 
   const handleSearch = () => {
@@ -405,10 +399,8 @@ const ProductCatalogue = () => {
         <div className="product-card-container">
           {filteredProducts.map((product) => (
             <ProductCard
-              key={product.id}
+              key={product.title.length+product.image.length+product.quantity+product.price}
               product={product}
-              cart={cart}
-              setCart={setCart}
             />
           ))}
         </div>

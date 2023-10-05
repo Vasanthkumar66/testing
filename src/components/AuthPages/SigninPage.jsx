@@ -17,11 +17,11 @@ import "./SigninPage.css";
 import loginlogo from "../../Assets/login-logo.png";
 import bcrypt from "bcryptjs";
 import { useAuth } from "./useAuth";
-import {useDispatch} from 'react-redux'
+import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../Redux/actions/userAction";
 export default function SigninPage() {
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -42,22 +42,24 @@ export default function SigninPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-      const user = storedUsers.find((u) => u.email === formData.email);
-      if (user && (await bcrypt.compare(formData.password, user.password))) {
-        login();  
-        dispatch(loginSuccess(user))
-        toast.success("Signed In successfully!!", {
-          position: "top-right",
-          autoClose: 2500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          theme: "colored",
-        });
-        navigate("/products",{state:{user}});
-      } else {
+      const user = {
+        email: formData.email,
+        password: formData.password,
+      };
+      const requestBody = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user),
+      };
+      const response = await fetch("http://localhost:8052/login", requestBody);
+      const responsedata = await response.text();
+      //console.log(response)
+      
+      // const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+      // const user = storedUsers.find((u) => u.email === formData.email);
+      if (responsedata === "User not found") {
         toast.error("Invalid e-mail or password!!", {
           position: "top-right",
           autoClose: 3000,
@@ -67,6 +69,22 @@ export default function SigninPage() {
           draggable: true,
           theme: "colored",
         });
+      } else {
+        const existingUser= await JSON.parse(responsedata)
+        if (existingUser && (await bcrypt.compare(formData.password, existingUser.password))) {
+          login();
+          dispatch(loginSuccess(user));
+          toast.success("Signed In successfully!!", {
+            position: "top-right",
+            autoClose: 2500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            theme: "colored",
+          });
+          navigate("/products", { state: { user } });
+        }
       }
     } catch (error) {
       console.error("Error:", error);

@@ -30,7 +30,7 @@ const Inventory = () => {
     title: "",
     price: 0,
     description: "",
-    images: [],
+    image: "",
     quantity: 0,
   });
   const [typedText, setTypedText] = useState("");
@@ -69,42 +69,123 @@ const Inventory = () => {
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
-    if (name === "images") {
-      setFormData({ ...formData, images: value.split(",") });
+    // if (name === "images") {
+    //   setFormData({ ...formData, images: value.split(",") });
+    // }
+  };
+
+  // function generateRandomId() {
+  //   return Math.ceil(Math.random() * 10000);
+  // }
+
+  // const handleAddItem = async () => {
+  //   // const existingItems = JSON.parse(localStorage.getItem("items")) || [];
+  //   // const newItem = { ...formData, id: generateRandomId() };
+  //   // existingItems.push(newItem);
+  //   // localStorage.setItem("items", JSON.stringify(existingItems));
+
+  //   setFormData({
+  //     title: "",
+  //     price: 0,
+  //     description: "",
+  //     image: "",
+  //     quantity: 0,
+  //   });
+  //   toast.success("Item added successfully to the Inventory", {
+  //     position: toast.POSITION.TOP_RIGHT,
+  //     autoClose: 2500,
+  //     hideProgressBar: false,
+  //     closeOnClick: true,
+  //     pauseOnHover: false,
+  //   });
+  //   setInventoryItems(existingItems);
+  // };
+
+  const handleAddItem = async () => {
+    try {
+      const product = {
+        title: formData.title,
+        price: formData.price,
+        image: formData.image,
+        description: formData.description,
+        quantity: formData.quantity,
+      };
+      const response = await fetch("http://localhost:8052/addproduct", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(product),
+      });
+
+      if (response.ok) {
+        //const productDetails = await response.json();
+        // Assuming the response from "http://localhost:8051/addproduct" is JSON
+        //const newItem = { ...formData, ...productDetails };
+
+        // Update the local state with the new item
+        //setInventoryItems([...inventoryItems, newItem]);
+
+        // Clear the form fields
+        setFormData({
+          title: "",
+          price: 0,
+          description: "",
+          image: "",
+          quantity: 0,
+        });
+
+        toast.success("Item added successfully to the Inventory", {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 2500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+        });
+      } else {
+        toast.error("Failed to fetch product details", {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 2500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("An error occurred while adding the item", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+      });
     }
+
+    const fetchdata = async()=>{
+      const response = await fetch("http://localhost:8052/allproducts",{
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      })
+      const respdata= await response.json()
+           setInventoryItems(respdata);
+    }
+    fetchdata()
   };
 
-  function generateRandomId() {
-    return Math.ceil(Math.random() * 10000);
-  }
+  const handleRemoveItem = async () => {
+    const response = await fetch("http://localhost:8052/removeproduct",
+    {
+      method:"POST",
+      headers:{"Content-Type": "text/plain"},
+      body:selectedProduct
 
-  const handleAddItem = () => {
-    const existingItems = JSON.parse(localStorage.getItem("items")) || [];
-    const newItem = { ...formData, id: generateRandomId() };
-    existingItems.push(newItem);
-    localStorage.setItem("items", JSON.stringify(existingItems));
-    setFormData({
-      title: "",
-      price: 0,
-      description: "",
-      images: [],
-      quantity: 0,
-    });
-    toast.success("Item added successfully to the Inventory", {
-      position: toast.POSITION.TOP_RIGHT,
-      autoClose: 2500,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-    });
-    setInventoryItems(existingItems);
-  };
-
-  const handleRemoveItem = () => {
-    const updatedInventory = inventoryItems.filter(
-      (item) => item.title !== selectedProduct
-    );
-    localStorage.setItem("items", JSON.stringify(updatedInventory));
+    })
+    const resptext = await response.text();
+    console.log(response)
+    console.log(resptext)
     setSelectedProduct("");
     toast.success("Item removed successfully from the Inventory", {
       position: toast.POSITION.TOP_RIGHT,
@@ -113,7 +194,17 @@ const Inventory = () => {
       closeOnClick: true,
       pauseOnHover: false,
     });
-    setInventoryItems(updatedInventory);
+      const fetchdata = async()=>{
+      const response = await fetch("http://localhost:8052/allproducts",{
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      })
+      const respdata= await response.json()
+           setInventoryItems(respdata);
+    }
+    fetchdata()
   };
 
   const clearAddItemFields = () => {
@@ -121,7 +212,7 @@ const Inventory = () => {
       title: "",
       price: 0,
       description: "",
-      images: [],
+      image: "",
       quantity: 0,
     });
   };
@@ -131,8 +222,17 @@ const Inventory = () => {
   };
 
   useEffect(() => {
-    const existingItems = JSON.parse(localStorage.getItem("items")) || [];
-    setInventoryItems(existingItems);
+    const fetchdata = async () => {
+      const response = await fetch("http://localhost:8052/allproducts", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const respdata = await response.json();
+      setInventoryItems(respdata);
+    };
+    fetchdata();
   }, []);
 
   return (
@@ -299,9 +399,9 @@ const Inventory = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Image URLs (comma-separated)"
-                  name="images"
-                  value={formData.images.join(",")}
+                  label="Image URL"
+                  name="image"
+                  value={formData.image}
                   onChange={handleInputChange}
                 />
               </Grid>
@@ -333,7 +433,7 @@ const Inventory = () => {
                   Add Item
                 </Button>
                 <Button
-                   sx={{
+                  sx={{
                     marginTop: "12px",
                     marginLeft: "12px",
                     color: "black",
@@ -345,7 +445,7 @@ const Inventory = () => {
                   }}
                   variant="contained"
                   color="primary"
-                  onClick={clearAddItemFields} 
+                  onClick={clearAddItemFields}
                 >
                   Clear Selection
                 </Button>
@@ -358,7 +458,7 @@ const Inventory = () => {
                     onChange={(e) => setSelectedProduct(e.target.value)}
                   >
                     {inventoryItems.map((item) => (
-                      <MenuItem key={item.id} value={item.title}>
+                      <MenuItem key={item.title.length+item.price} value={item.title}>
                         {item.title}
                       </MenuItem>
                     ))}
@@ -383,7 +483,7 @@ const Inventory = () => {
                   Remove Item
                 </Button>
                 <Button
-                   sx={{
+                  sx={{
                     marginTop: "12px",
                     marginLeft: "12px",
                     color: "black",
@@ -395,7 +495,7 @@ const Inventory = () => {
                   }}
                   variant="contained"
                   color="primary"
-                  onClick={clearRemoveItemField} 
+                  onClick={clearRemoveItemField}
                 >
                   Clear Selection
                 </Button>

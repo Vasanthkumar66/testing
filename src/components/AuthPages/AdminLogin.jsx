@@ -40,12 +40,27 @@ export default function AdminLogin() {
     event.preventDefault();
   
     try {
-      const storedAdminJSON = localStorage.getItem("admin");
-      const storedAdmin = storedAdminJSON ? JSON.parse(storedAdminJSON) : [];
+      const admin = {
+        email: formData.email,
+        password: formData.password,
+      };
+      const requestBody = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(admin),
+      };
+      const response = await fetch("http://localhost:8052/isadmin", requestBody);
+      const responsedata = await response.text();
+      console.log(response)
+      console.log(responsedata)
+      // const storedAdminJSON = localStorage.getItem("admin");
+      // const storedAdmin = storedAdminJSON ? JSON.parse(storedAdminJSON) : [];
   
-      const admin = storedAdmin.find((u) => u.email === formData.email);
+      // const admin = storedAdmin.find((u) => u.email === formData.email);
   
-      if (admin && (formData.password === admin.password)) {
+      if (responsedata==="true") {
         adminLogin();
         toast.success("Signed In as Admin Successfully!!", {
           position: "top-right",

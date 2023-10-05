@@ -64,7 +64,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 const ProductCard = ({ product }) => {
-  const { id, title, price, description, images } = product;
+  const { title, price, description, image } = product;
 
   return (
     <Card
@@ -78,7 +78,7 @@ const ProductCard = ({ product }) => {
     >
       <CardMedia
         className="product-image"
-        image={images[0]}
+        image={image}
         title={title}
         children={<div></div>}
       />
@@ -188,10 +188,22 @@ const LandingPage = () => {
     };
   }, []);
   useEffect(() => {
-    const localProducts = JSON.parse(localStorage.getItem("items")) || [];
-    const mergedProducts = [...localProducts];
-    setProducts(mergedProducts);
-    setFilteredProducts(mergedProducts);
+    const fetchdata = async()=>{
+      const response = await fetch("http://localhost:8052/allproducts",{
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      })
+      const respdata= await response.json()
+           setProducts(respdata);
+           setFilteredProducts(respdata);
+    }
+    fetchdata()
+    // const localProducts = JSON.parse(localStorage.getItem("items")) || [];
+    // const mergedProducts = [...localProducts];
+    // setProducts(mergedProducts);
+    // setFilteredProducts(mergedProducts);
     // fetch("https://api.escuelajs.co/api/v1/products")
     //   .then((response) => response.json())
     //   .then((data) => {
