@@ -32,7 +32,6 @@ import logo from "../HomePage/Headers/header.png";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useNavigate } from "react-router-dom";
 import Footer from "../HomePage/Footers/Footer";
-import { v4 as uuidv4 } from "uuid";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import "./Products.css";
 import Faqs from "../LandingPage/Faqs";
@@ -276,15 +275,13 @@ const Products = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [selectedSortOption, setSelectedSortOption] = useState("");
-  const [cart, setCart] = useState([]);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
-  const u_id = location.state.existingUser.uid;
   const [userData, setUserData] = useState({
-    name: location.state.existingUser.name,
-    country: location.state.existingUser.country,
-    email: location.state.existingUser.email,
-    contact: location.state.existingUser.contact,
-  });
+    name: location.state?.existingUser?.name || "",
+    country: location.state?.existingUser?.country || "",
+    email: location.state?.existingUser?.email || "",
+    contact: location.state?.existingUser?.contact || "",
+  })
   const [isEditing, setIsEditing] = useState(false);
   useEffect(() => {
     const fetchdata = async () => {
@@ -302,25 +299,7 @@ const Products = () => {
     fetchdata();
   }, []);
 
-  // useEffect(() => {
-  //   const fetchdata = async () => {
-  //     const response = await fetch(`http://localhost:8057/user/${u_id}`, {
-  //       method: "GET",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${getToken()}`,
-  //       },
-  //     });
-  //     const respdata = await response.json();
-  //     setUserData({
-  //       name: respdata.body.name,
-  //       country: respdata.body.country,
-  //       email: respdata.body.email,
-  //       contact: respdata.body.contact,
-  //     });
-  //   };
-  //   fetchdata();
-  // }, [setIsEditing]);
+
 
   const getToken = () => {
     return localStorage.getItem("token");
