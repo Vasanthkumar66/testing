@@ -69,51 +69,36 @@ export default function SignupPage() {
 
       const hashedPassword = await bcrypt.hash(formData.password, 10);
       const newUser = {
-        username: formData.username,
+        name: formData.username,
         email: formData.email,
         password: hashedPassword,
         country: formData.country,
-        contact: formData.contact,
+        contact: formData.contact
       };
-      //const userExists = 0;
-      // const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-      // const userExists = storedUsers.find(
-      //   (user) => user.email === formData.email
-      // );
 
-      // if (userExists) {
-      //   toast.warning("User with this e-mail already exists!!", {
-      //     position: "top-right",
-      //     autoClose: 3000,
-      //     hideProgressBar: false,
-      //     closeOnClick: true,
-      //     pauseOnHover: false,
-      //     draggable: true,
-      //     theme: "colored",
-      //   });
-      // } else {
-        const requestBody = {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newUser),
-        };
+      const requestBody = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newUser),
+      };
 
-        // Send a POST request to the server
-        const response = await fetch("http://localhost:8052/add", requestBody);
-        const responsedata=await response.text()
-        //console.log(responsedata)
-        if (responsedata==="User with this email already exists") {
-          toast.warning("User with this e-mail already exists!!", {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: true,
-            theme: "colored",
-          });}else{
+      const response = await fetch("http://localhost:8057/add", requestBody);
+      
+      const responsedata = await response.text();
+      //console.log(responsedata)
+      if (responsedata === "User with this email already exists") {
+        toast.warning("User with this e-mail already exists!!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          theme: "colored",
+        });
+      } else if (responsedata === "User saved successfully") {
         toast.success("User created successfully!!", {
           position: "top-right",
           autoClose: 3000,
@@ -131,7 +116,8 @@ export default function SignupPage() {
           country: "",
         });
         navigate("/login");
-    } }catch (error) {
+      }
+    } catch (error) {
       console.error("Error:", error);
       toast.error("An error occurred while processing your request", {
         position: "top-right",

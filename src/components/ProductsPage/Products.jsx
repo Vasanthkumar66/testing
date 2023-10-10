@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import {
   Dialog,
   DialogActions,
@@ -75,23 +76,48 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const ProductCard = ({ product, cart, setCart }) => {
+const ProductCard = ({ product }) => {
   const { title, price, description, image, quantity } = product;
-
+  const [cartQuantity, setCartQuantity] = useState(1);
+  const getToken = () => {
+    return localStorage.getItem("token");
+  };
+  const handleQuantityChange = (event) => {
+    setCartQuantity(event.target.value);
+  };
   const addToCart = (product) => {
-    const productWithId = { ...product, id: uuidv4() };
-    setCart([...cart, productWithId]);
-    localStorage.setItem("cart", JSON.stringify([...cart, productWithId]));
-    toast.info(`${product.title} added to the cart 😉`, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
+    const cartItemDTO = {
+      productId: product.id,
+      quantity: cartQuantity,
+    };
+
+    // if(cartQuantity>quantity)
+    // {
+    //   toast.warning("Not enough stock for your selection, change the quantity");
+    //   setCartQuantity(1)
+    // }
+    // else{
+    axios
+      .post("http://localhost:8057/cart/add", cartItemDTO, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          //setCart([...cart, product]);
+          //localStorage.setItem("cart", JSON.stringify([...cart, product]));
+          toast.info(`${product.title} added to the cart 😉`);
+          setCartQuantity(1);
+        } else {
+          toast.error("Failed to add item to the cart");
+        }
+      })
+      .catch((error) => {
+        console.error("Error adding item to the cart:", error);
+        toast.error("An error occurred while adding item to the cart");
+      });
   };
 
   return (
@@ -143,6 +169,7 @@ const ProductCard = ({ product, cart, setCart }) => {
           </span>
           <span className="tail"> (84%off)</span>
         </Typography>
+
         <div
           style={{
             display: "flex",
@@ -151,6 +178,16 @@ const ProductCard = ({ product, cart, setCart }) => {
           }}
         >
           <div className="product-rating">{generateStars(3)}</div>
+          <div className="product-quantity">
+            <TextField
+              type="number"
+              label="Quantity"
+              variant="outlined"
+              value={cartQuantity}
+              onChange={handleQuantityChange}
+              InputProps={{ inputProps: { min: 1 } }}
+            />
+          </div>
           <Tooltip
             TransitionComponent={Zoom}
             placement="left-start"
@@ -231,10 +268,6 @@ const generateStars = (rating) => {
 const Products = () => {
   const [typedText, setTypedText] = useState("");
   const location = useLocation();
-  const fullText =
-    "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
-  const delay = 75;
-  const [effVar, setEffVar] = useState(true);
   const [searchInput, setSearchInput] = useState("");
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -245,45 +278,53 @@ const Products = () => {
   const [selectedSortOption, setSelectedSortOption] = useState("");
   const [cart, setCart] = useState([]);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const u_id = location.state.existingUser.uid;
   const [userData, setUserData] = useState({
-    username: location.state.user.username,
-    age: location.state.user.age,
-    country: location.state.user.country,
-    email: location.state.user.email,
+    name: location.state.existingUser.name,
+    country: location.state.existingUser.country,
+    email: location.state.existingUser.email,
+    contact: location.state.existingUser.contact,
   });
   const [isEditing, setIsEditing] = useState(false);
   useEffect(() => {
-    const fetchdata = async()=>{
-      const response = await fetch("http://localhost:8052/allproducts",{
+    const fetchdata = async () => {
+      const response = await fetch("http://localhost:8057/user/allproducts", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-        }
-      })
-      const respdata= await response.json()
-           setProducts(respdata);
-           setFilteredProducts(respdata);
-    }
-    fetchdata()
-    // const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    // setCart(storedCart);
-    // const localStorageItems = JSON.parse(localStorage.getItem("items")) || [];
-    // const mergedProducts = [...localStorageItems];
-    // setProducts(mergedProducts);
-    // setFilteredProducts(mergedProducts);
-    // fetch("https://api.escuelajs.co/api/v1/products")
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     const localStorageItems =
-    //       JSON.parse(localStorage.getItem("items")) || [];
-    //     const mergedProducts = [...localStorageItems, ...data];
-    //     setProducts(mergedProducts);
-    //     setFilteredProducts(mergedProducts);
-    //   })
-    //   .catch((error) => console.error("Error fetching data:", error));
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+      const respdata = await response.json();
+      setProducts(respdata);
+      setFilteredProducts(respdata);
+    };
+    fetchdata();
   }, []);
 
-  //console.log(location);
+  // useEffect(() => {
+  //   const fetchdata = async () => {
+  //     const response = await fetch(`http://localhost:8057/user/${u_id}`, {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${getToken()}`,
+  //       },
+  //     });
+  //     const respdata = await response.json();
+  //     setUserData({
+  //       name: respdata.body.name,
+  //       country: respdata.body.country,
+  //       email: respdata.body.email,
+  //       contact: respdata.body.contact,
+  //     });
+  //   };
+  //   fetchdata();
+  // }, [setIsEditing]);
+
+  const getToken = () => {
+    return localStorage.getItem("token");
+  };
 
   const handleSearch = () => {
     if (searchInput.trim() === "") {
@@ -293,7 +334,7 @@ const Products = () => {
       const filtered = products.filter((product) =>
         product.title.toLowerCase().includes(searchInput.toLowerCase())
       );
-      console.log(filtered);
+      // console.log(filtered);
       setFilteredProducts(filtered);
       setShowNoMatchCard(filtered.length === 0);
     }
@@ -317,15 +358,7 @@ const Products = () => {
   };
 
   const handleEditProfile = () => {
-    // Populate dialog fields with existing user data
-    setUserData({
-      username: location.state.user.username,
-      age: location.state.user.age,
-      country: location.state.user.country,
-      email: location.state.user.email,
-    });
-
-    setIsEditing(true); // Enable editing when "Edit" button is clicked
+    setIsEditing(true);
     setIsProfileDialogOpen(true);
   };
 
@@ -346,11 +379,9 @@ const Products = () => {
             }}
             label="Username"
             fullWidth
-            value={userData.username}
-            onChange={(e) =>
-              setUserData({ ...userData, username: e.target.value })
-            }
-            disabled={!isEditing} // Disable if not in editing mode
+            value={userData.name}
+            onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+            disabled={!isEditing}
           />
           <TextField
             sx={{
@@ -362,7 +393,19 @@ const Products = () => {
             onChange={(e) =>
               setUserData({ ...userData, email: e.target.value })
             }
-            disabled // Disable if not in editing mode
+            disabled
+          />
+          <TextField
+            sx={{
+              marginTop: "20px",
+            }}
+            label="Contact"
+            fullWidth
+            value={userData.contact}
+            onChange={(e) =>
+              setUserData({ ...userData, contact: e.target.value })
+            }
+            disabled={!isEditing}
           />
           <TextField
             sx={{
@@ -374,9 +417,9 @@ const Products = () => {
             onChange={(e) =>
               setUserData({ ...userData, country: e.target.value })
             }
-            disabled={!isEditing} // Disable if not in editing mode
+            disabled
           />
-          <TextField
+          {/* <TextField
             sx={{
               marginTop: "20px",
             }}
@@ -384,16 +427,16 @@ const Products = () => {
             fullWidth
             value={location.state.user.boughtProducts.length}
             disabled // Always disabled for "No. of Purchases"
-          />
+          /> */}
         </DialogContent>
         <DialogActions>
-          {!isEditing && ( // Show "Edit" button if not in editing mode
-            <Button onClick={handleEditProfile}>Edit</Button>
-          )}
-          {isEditing && ( // Show "Save Changes" and "Cancel" buttons in editing mode
+          {!isEditing && <Button onClick={handleEditProfile}>Edit</Button>}
+          {isEditing && (
             <>
               <Button onClick={handleSaveChanges}>Save Changes</Button>
-              <Button onClick={() => setIsProfileDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => setIsProfileDialogOpen(false)}>
+                Cancel
+              </Button>
             </>
           )}
         </DialogActions>
@@ -401,31 +444,30 @@ const Products = () => {
     );
   };
 
-
-
-
-  const handleSaveChanges = () => {
-    // Find the user with the same email ID in localStorage
-    const usersFromLocalStorage =
-      JSON.parse(localStorage.getItem("users")) || [];
-    const updatedUsers = usersFromLocalStorage.map((user) => {
-      if (user.email === userData.email) {
-        // Update user data
-        return {
-          ...user,
-          username: userData.username,
-          country: userData.country,
-        };
-      }
-      return user;
-    });
-
-    // Update localStorage with the modified data
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-
-    toast.success("User updated Successfully")
-    setIsProfileDialogOpen(false);
-    setIsEditing(!isEditing)
+  const handleSaveChanges = async () => {
+    const updatedUserData = {
+      ...userData,
+    };
+    console.log(updatedUserData)
+    axios
+      .patch("http://localhost:8057/update", updatedUserData, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          toast.success("User updated Successfully");
+          setIsProfileDialogOpen(false);
+          setIsEditing(!isEditing);
+        } else {
+          toast.error("Failed to update user");
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating user:", error);
+        toast.error("An error occurred while updating user");
+      });
   };
 
   const handleSortChange = (event) => {
@@ -543,6 +585,7 @@ const Products = () => {
                   marginLeft: "15px",
                 }}
                 onClick={() => {
+                  localStorage.removeItem("token");
                   logout();
                   toast.success("Signed Out successfully!!", {
                     position: "top-right",
@@ -644,12 +687,7 @@ const Products = () => {
       <div className="centered-container">
         <div className="product-card-container">
           {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              cart={cart}
-              setCart={setCart}
-            />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
         {showNoMatchCard && (

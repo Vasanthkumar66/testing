@@ -46,6 +46,7 @@ export default function SigninPage() {
         email: formData.email,
         password: formData.password,
       };
+      //console.log(user);
       const requestBody = {
         method: "POST",
         headers: {
@@ -53,13 +54,10 @@ export default function SigninPage() {
         },
         body: JSON.stringify(user),
       };
-      const response = await fetch("http://localhost:8052/login", requestBody);
-      const responsedata = await response.text();
-      //console.log(response)
+      const response = await fetch("http://localhost:8057/login", requestBody);
+      const responsedata = await response.json();
       
-      // const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-      // const user = storedUsers.find((u) => u.email === formData.email);
-      if (responsedata === "User not found") {
+      if (responsedata.statusCodeValue === 401) {
         toast.error("Invalid e-mail or password!!", {
           position: "top-right",
           autoClose: 3000,
@@ -69,11 +67,14 @@ export default function SigninPage() {
           draggable: true,
           theme: "colored",
         });
-      } else {
-        const existingUser= await JSON.parse(responsedata)
-        if (existingUser && (await bcrypt.compare(formData.password, existingUser.password))) {
+      } else if(responsedata.statusCodeValue === 200) {
+        const existingUser = responsedata.body;
+        if (
+          existingUser &&
+          (await bcrypt.compare(formData.password, existingUser.password))
+        ) {
           login();
-          dispatch(loginSuccess(user));
+          localStorage.setItem('token', existingUser.token);
           toast.success("Signed In successfully!!", {
             position: "top-right",
             autoClose: 2500,
@@ -83,7 +84,7 @@ export default function SigninPage() {
             draggable: true,
             theme: "colored",
           });
-          navigate("/products", { state: { user } });
+          navigate("/products", { state: { existingUser } });
         }
       }
     } catch (error) {

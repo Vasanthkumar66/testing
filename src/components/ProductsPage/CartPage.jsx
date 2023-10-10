@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import Toolbar from "@mui/material/Toolbar";
@@ -20,8 +20,9 @@ import Tooltip from "@mui/material/Tooltip";
 import Zoom from "@mui/material/Zoom";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import Footer from "../HomePage/Footers/Footer";
-const ProductCard = ({ product, removeFromCart }) => {
-  const { id, title, price, description, images } = product;
+
+const ProductCard = ({ product, removeFromCart, quantity }) => {
+  const { id, title, price, description, image } = product;
 
   return (
     <Card
@@ -35,7 +36,7 @@ const ProductCard = ({ product, removeFromCart }) => {
     >
       <CardMedia
         className="product-image"
-        image={images[0]}
+        image={image}
         title={title}
         children={<div></div>}
       />
@@ -80,28 +81,60 @@ const ProductCard = ({ product, removeFromCart }) => {
           }}
         >
           <div className="product-rating">{generateStars(3)}</div>
-          <Tooltip
-            TransitionComponent={Zoom}
-            placement="left-start"
-            title="Remove"
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+            }}
           >
-            <IconButton
-              className="cart-icon"
-              onClick={() => removeFromCart(id)}
-              sx={{
-                color: "#eeb03d",
-                marginTop: "21px",
-                backgroundColor: "rgba(0, 0, 0, 0.7)",
-                transition: "color 0.3s, background-color 0.3s",
-                "&:hover": {
-                  color: "rgba(0, 0, 0, 0.7)",
-                  backgroundColor: "#eeb03d",
-                },
-              }}
+            <Tooltip
+              TransitionComponent={Zoom}
+              placement="left-start"
+              title="Quantity"
             >
-              <RemoveShoppingCartIcon />
-            </IconButton>
-          </Tooltip>
+              <IconButton
+                className="cart-icon"
+                sx={{
+                  height:"40px",
+                  width:"40px",
+                  color: "#eeb03d",
+                  marginTop: "21px",
+                  marginLeft: "10px",
+                  backgroundColor: "rgba(0, 0, 0, 0.7)",
+                  transition: "color 0.3s, background-color 0.3s",
+                  "&:hover": {
+                    color: "rgba(0, 0, 0, 0.7)",
+                    backgroundColor: "#eeb03d",
+                  },
+                }}
+              >
+                {quantity}
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              TransitionComponent={Zoom}
+              placement="right-start"
+              title="Remove"
+            >
+              <IconButton
+                className="cart-icon"
+                onClick={() => removeFromCart(id)}
+                sx={{
+                  color: "#eeb03d",
+                  marginTop: "21px",
+                  marginLeft: "10px",
+                  backgroundColor: "rgba(0, 0, 0, 0.7)",
+                  transition: "color 0.3s, background-color 0.3s",
+                  "&:hover": {
+                    color: "rgba(0, 0, 0, 0.7)",
+                    backgroundColor: "#eeb03d",
+                  },
+                }}
+              >
+                <RemoveShoppingCartIcon />
+              </IconButton>
+            </Tooltip>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -130,6 +163,7 @@ const generateStars = (rating) => {
 };
 
 const CartPage = () => {
+  const navigate = useNavigate()
   const [typedText, setTypedText] = useState("");
   const fullText =
     "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
@@ -171,37 +205,70 @@ const CartPage = () => {
     };
   }, []);
 
+  const getToken = () => {
+    return localStorage.getItem("token");
+  };
+
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCart(storedCart);
+    fetch("http://localhost:8057/cart/get", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setCart(data);
+        //console.log(data)
+      })
+      .catch((error) => {
+        console.error("Error fetching cart items:", error);
+      });
   }, []);
 
   useEffect(() => {
     const calculatedTotalPrice = cart.reduce(
-      (total, product) => total + parseFloat(product.price),
+      (total, product) =>
+        total + parseFloat(product.product.price) * product.quantity,
       0
     );
     setTotalPrice(calculatedTotalPrice);
   }, [cart]);
 
-  const removeFromCart = (productId) => {
-    const updatedCart = cart.filter((product) => product.id !== productId);
+  const removeFromCart = (cartItemId) => {
+    const updatedCart = cart.filter((item) => item.cartItemId !== cartItemId);
     setCart(updatedCart);
-    const updatedLocalStorageCart = cart.filter(
-      (product) => product.id !== productId
-    );
-    localStorage.setItem("cart", JSON.stringify(updatedLocalStorageCart));
-
-    toast.info(`Item removed from the cart 🙂`, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
+    fetch(`http://localhost:8057/cart/remove/${cartItemId}`, {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Failed to remove item from cart.");
+        }
+      })
+      .then(() => {
+        toast.info(`Item removed from the cart 🙂`, {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .catch((error) => {
+        console.error("Error removing item from cart:", error);
+      });
   };
 
   const handleFormOpen = () => {
@@ -280,8 +347,9 @@ const CartPage = () => {
             >
               <span className="head-title">{typedText}</span>
             </Typography>
-            <Link to="/products" style={{ textDecoration: "none" }}>
+            <Link style={{ textDecoration: "none" }}>
               <Button
+              onClick={navigate('/products')}
                 className="button"
                 sx={{
                   color: "black",
@@ -379,10 +447,11 @@ const CartPage = () => {
       <div className="centered-container">
         <div className="product-card-container">
           {cart.length >= 1 ? (
-            cart.map((product) => (
+            cart.map((item) => (
               <ProductCard
-                key={product.id}
-                product={product}
+                key={item.cartItemId}
+                product={item.product}
+                quantity={item.quantity}
                 removeFromCart={removeFromCart}
               />
             ))

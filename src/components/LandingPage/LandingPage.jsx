@@ -189,7 +189,7 @@ const LandingPage = () => {
   }, []);
   useEffect(() => {
     const fetchdata = async()=>{
-      const response = await fetch("http://localhost:8052/allproducts",{
+      const response = await fetch("http://localhost:8057/allproducts",{
         method: "GET",
         headers: {
           "Content-Type": "application/json",

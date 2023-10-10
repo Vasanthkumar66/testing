@@ -6,7 +6,8 @@ import { AuthProvider } from "./components/AuthPages/useAuth";
 import { useEffect } from "react";
 import { store } from "./Redux/stores";
 import { Provider } from "react-redux";
-function App() {
+function App()
+{
   useEffect(() => {
     localStorage.setItem(
       "admin",

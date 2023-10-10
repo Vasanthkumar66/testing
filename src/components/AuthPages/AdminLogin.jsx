@@ -51,7 +51,7 @@ export default function AdminLogin() {
         },
         body: JSON.stringify(admin),
       };
-      const response = await fetch("http://localhost:8052/isadmin", requestBody);
+      const response = await fetch("http://localhost:8057/isadmin", requestBody);
       const responsedata = await response.text();
       console.log(response)
       console.log(responsedata)

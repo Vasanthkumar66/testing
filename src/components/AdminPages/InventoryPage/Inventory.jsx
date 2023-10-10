@@ -110,7 +110,7 @@ const Inventory = () => {
         description: formData.description,
         quantity: formData.quantity,
       };
-      const response = await fetch("http://localhost:8052/addproduct", {
+      const response = await fetch("http://localhost:8057/addproduct", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -163,7 +163,7 @@ const Inventory = () => {
     }
 
     const fetchdata = async()=>{
-      const response = await fetch("http://localhost:8052/allproducts",{
+      const response = await fetch("http://localhost:8057/allproducts",{
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -176,7 +176,7 @@ const Inventory = () => {
   };
 
   const handleRemoveItem = async () => {
-    const response = await fetch("http://localhost:8052/removeproduct",
+    const response = await fetch("http://localhost:8057/removeproduct",
     {
       method:"POST",
       headers:{"Content-Type": "text/plain"},
@@ -195,7 +195,7 @@ const Inventory = () => {
       pauseOnHover: false,
     });
       const fetchdata = async()=>{
-      const response = await fetch("http://localhost:8052/allproducts",{
+      const response = await fetch("http://localhost:8057/allproducts",{
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -223,7 +223,7 @@ const Inventory = () => {
 
   useEffect(() => {
     const fetchdata = async () => {
-      const response = await fetch("http://localhost:8052/allproducts", {
+      const response = await fetch("http://localhost:8057/allproducts", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

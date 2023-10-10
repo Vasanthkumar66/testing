@@ -15,7 +15,7 @@
 }
 
 .product-card {
-  max-width: 250px;
+  max-width: 300px !important;
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Added transition property */
   margin: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -60,6 +60,17 @@
 .product-card:hover {
   transform: scale(1.05);
   box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.product-quantity
+{
+  max-width: 75px;
+  margin-top: 25px;
+}
+
+.product-quantity .MuiInputBase-input {
+  height: 32px; /* Adjust the height to your preference */
+  padding: 6px 12px; /* Adjust the padding as needed */
 }
 
 .img {
