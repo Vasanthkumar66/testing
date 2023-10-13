@@ -53,8 +53,8 @@ export default function AdminLogin() {
       };
       const response = await fetch("http://localhost:8057/isadmin", requestBody);
       const responsedata = await response.text();
-      console.log(response)
-      console.log(responsedata)
+      // console.log(response)
+      // console.log(responsedata)
       // const storedAdminJSON = localStorage.getItem("admin");
       // const storedAdmin = storedAdminJSON ? JSON.parse(storedAdminJSON) : [];
   

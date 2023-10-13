@@ -200,18 +200,6 @@ const LandingPage = () => {
            setFilteredProducts(respdata);
     }
     fetchdata()
-    // const localProducts = JSON.parse(localStorage.getItem("items")) || [];
-    // const mergedProducts = [...localProducts];
-    // setProducts(mergedProducts);
-    // setFilteredProducts(mergedProducts);
-    // fetch("https://api.escuelajs.co/api/v1/products")
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     const mergedProducts = [...localProducts, ...data];
-    //     setProducts(mergedProducts);
-    //     setFilteredProducts(mergedProducts);
-    //   })
-    //   .catch((error) => console.error("Error fetching data:", error));
   }, []);
   const handleSearch = () => {
     const lowercasedSearchInput = searchInput.toLowerCase().trim(); // Convert search input to lowercase

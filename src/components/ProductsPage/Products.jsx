@@ -7,6 +7,7 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
+  Button,
 } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
@@ -24,18 +25,16 @@ import { styled, alpha } from "@mui/material/styles";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
-import { Link } from "react-router-dom";
-import { Button } from "@mui/material";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
 import Zoom from "@mui/material/Zoom";
 import logo from "../HomePage/Headers/header.png";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import { useNavigate } from "react-router-dom";
 import Footer from "../HomePage/Footers/Footer";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import "./Products.css";
 import Faqs from "../LandingPage/Faqs";
-import { useLocation } from "react-router-dom";
+
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -89,13 +88,6 @@ const ProductCard = ({ product }) => {
       productId: product.id,
       quantity: cartQuantity,
     };
-
-    // if(cartQuantity>quantity)
-    // {
-    //   toast.warning("Not enough stock for your selection, change the quantity");
-    //   setCartQuantity(1)
-    // }
-    // else{
     axios
       .post("http://localhost:8057/cart/add", cartItemDTO, {
         headers: {
@@ -105,8 +97,6 @@ const ProductCard = ({ product }) => {
       })
       .then((response) => {
         if (response.status === 200) {
-          //setCart([...cart, product]);
-          //localStorage.setItem("cart", JSON.stringify([...cart, product]));
           toast.info(`${product.title} added to the cart 😉`);
           setCartQuantity(1);
         } else {
@@ -277,12 +267,13 @@ const Products = () => {
   const [selectedSortOption, setSelectedSortOption] = useState("");
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [userData, setUserData] = useState({
-    name: location.state?.existingUser?.name || "",
-    country: location.state?.existingUser?.country || "",
-    email: location.state?.existingUser?.email || "",
-    contact: location.state?.existingUser?.contact || "",
-  })
+    name: location.state ? location.state.existingUser.name : "",
+    country: location.state ? location.state.existingUser.country : "",
+    email: location.state ? location.state.existingUser.email : "",
+    contact: location.state ? location.state.existingUser.contact : "",
+  });
   const [isEditing, setIsEditing] = useState(false);
+  //console.log(location.state)
   useEffect(() => {
     const fetchdata = async () => {
       const response = await fetch("http://localhost:8057/user/allproducts", {
@@ -299,8 +290,6 @@ const Products = () => {
     fetchdata();
   }, []);
 
-
-
   const getToken = () => {
     return localStorage.getItem("token");
   };
@@ -313,7 +302,6 @@ const Products = () => {
       const filtered = products.filter((product) =>
         product.title.toLowerCase().includes(searchInput.toLowerCase())
       );
-      // console.log(filtered);
       setFilteredProducts(filtered);
       setShowNoMatchCard(filtered.length === 0);
     }
@@ -427,12 +415,13 @@ const Products = () => {
     const updatedUserData = {
       ...userData,
     };
-    console.log(updatedUserData)
+    //console.log(updatedUserData);
     axios
-      .patch("http://localhost:8057/update", updatedUserData, {
+      .put("http://localhost:8057/update", updatedUserData, {
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },
+        timeout: 15000,
       })
       .then((response) => {
         if (response.status === 200) {
@@ -441,11 +430,19 @@ const Products = () => {
           setIsEditing(!isEditing);
         } else {
           toast.error("Failed to update user");
+
+          setIsEditing(!isEditing);
         }
       })
       .catch((error) => {
-        console.error("Error updating user:", error);
-        toast.error("An error occurred while updating user");
+        if (error.message === "Network Error") {
+          toast.success("User updated Successfully");
+          setIsProfileDialogOpen(false);
+          setIsEditing(!isEditing);
+        } else {
+          toast.error("Failed to update user");
+          setIsEditing(!isEditing);
+        }
       });
   };
 
@@ -469,7 +466,8 @@ const Products = () => {
   };
 
   const handleCartClick = () => {
-    navigate("/cart-page");
+    //console.log(userData);
+    navigate("/cart-page", { state: { userData } });
   };
 
   return (

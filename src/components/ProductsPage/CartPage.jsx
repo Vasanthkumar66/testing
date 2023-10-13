@@ -3,7 +3,7 @@ import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import Toolbar from "@mui/material/Toolbar";
@@ -95,8 +95,8 @@ const ProductCard = ({ product, removeFromCart, quantity }) => {
               <IconButton
                 className="cart-icon"
                 sx={{
-                  height:"40px",
-                  width:"40px",
+                  height: "40px",
+                  width: "40px",
                   color: "#eeb03d",
                   marginTop: "21px",
                   marginLeft: "10px",
@@ -163,7 +163,16 @@ const generateStars = (rating) => {
 };
 
 const CartPage = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+  //console.log(location.state)
+  const [existingUser, setExistingUser] = useState({
+    name: "",
+    country: "",
+    email: "",
+    contact: "",
+  });
+  //console.log(existingUser)
   const [typedText, setTypedText] = useState("");
   const fullText =
     "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
@@ -314,6 +323,14 @@ const CartPage = () => {
     });
   };
 
+  const handleGroceryClick = () => {
+    const existingUser = location.state.userData;
+    //setExistingUser(existingUser);
+    navigate("/products", { state: { existingUser } });
+  };
+  
+  
+
   return (
     <div>
       <Box sx={{ flexGrow: 1 }}>
@@ -347,9 +364,8 @@ const CartPage = () => {
             >
               <span className="head-title">{typedText}</span>
             </Typography>
-            <Link style={{ textDecoration: "none" }}>
               <Button
-              onClick={navigate('/products')}
+                onClick={handleGroceryClick}
                 className="button"
                 sx={{
                   color: "black",
@@ -362,7 +378,6 @@ const CartPage = () => {
                   Go to Grocery
                 </Typography>
               </Button>
-            </Link>
             {cart.length >= 1 ? (
               <Button
                 className="button"

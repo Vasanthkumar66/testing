@@ -33,7 +33,7 @@ const HomePage = ({ setAlert }) => {
           </>
         ) : (
           <>
-            <Route path="/products" element={<Navigate to="/login" />} />
+            <Route path="/products" element={<Navigate to="/" />} />
             <Route path="/cart-page" element={<Navigate to="/login" />} />
           </>
         )}

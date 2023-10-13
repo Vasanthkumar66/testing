@@ -110,7 +110,7 @@ const Inventory = () => {
         description: formData.description,
         quantity: formData.quantity,
       };
-      const response = await fetch("http://localhost:8057/addproduct", {
+      const response = await fetch("http://localhost:8057/admin/addproduct", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -118,15 +118,10 @@ const Inventory = () => {
         body: JSON.stringify(product),
       });
 
+      // console.log(response);
+      // console.log(product);
+
       if (response.ok) {
-        //const productDetails = await response.json();
-        // Assuming the response from "http://localhost:8051/addproduct" is JSON
-        //const newItem = { ...formData, ...productDetails };
-
-        // Update the local state with the new item
-        //setInventoryItems([...inventoryItems, newItem]);
-
-        // Clear the form fields
         setFormData({
           title: "",
           price: 0,
@@ -162,30 +157,28 @@ const Inventory = () => {
       });
     }
 
-    const fetchdata = async()=>{
-      const response = await fetch("http://localhost:8057/allproducts",{
+    const fetchdata = async () => {
+      const response = await fetch("http://localhost:8057/allproducts", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-        }
-      })
-      const respdata= await response.json()
-           setInventoryItems(respdata);
-    }
-    fetchdata()
+        },
+      });
+      const respdata = await response.json();
+      setInventoryItems(respdata);
+    };
+    fetchdata();
   };
 
   const handleRemoveItem = async () => {
-    const response = await fetch("http://localhost:8057/removeproduct",
-    {
-      method:"POST",
-      headers:{"Content-Type": "text/plain"},
-      body:selectedProduct
-
-    })
+    const response = await fetch("http://localhost:8057/removeproduct", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: selectedProduct,
+    });
     const resptext = await response.text();
-    console.log(response)
-    console.log(resptext)
+    // console.log(response)
+    // console.log(resptext)
     setSelectedProduct("");
     toast.success("Item removed successfully from the Inventory", {
       position: toast.POSITION.TOP_RIGHT,
@@ -194,17 +187,17 @@ const Inventory = () => {
       closeOnClick: true,
       pauseOnHover: false,
     });
-      const fetchdata = async()=>{
-      const response = await fetch("http://localhost:8057/allproducts",{
+    const fetchdata = async () => {
+      const response = await fetch("http://localhost:8057/allproducts", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-        }
-      })
-      const respdata= await response.json()
-           setInventoryItems(respdata);
-    }
-    fetchdata()
+        },
+      });
+      const respdata = await response.json();
+      setInventoryItems(respdata);
+    };
+    fetchdata();
   };
 
   const clearAddItemFields = () => {
@@ -458,7 +451,10 @@ const Inventory = () => {
                     onChange={(e) => setSelectedProduct(e.target.value)}
                   >
                     {inventoryItems.map((item) => (
-                      <MenuItem key={item.title.length+item.price} value={item.title}>
+                      <MenuItem
+                        key={item.title.length + item.price}
+                        value={item.title}
+                      >
                         {item.title}
                       </MenuItem>
                     ))}
