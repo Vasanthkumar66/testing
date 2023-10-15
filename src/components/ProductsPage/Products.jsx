@@ -87,6 +87,7 @@ const ProductCard = ({ product }) => {
     const cartItemDTO = {
       productId: product.id,
       quantity: cartQuantity,
+      price: product.price
     };
     axios
       .post("http://localhost:8057/cart/add", cartItemDTO, {
@@ -415,7 +416,6 @@ const Products = () => {
     const updatedUserData = {
       ...userData,
     };
-    //console.log(updatedUserData);
     axios
       .put("http://localhost:8057/update", updatedUserData, {
         headers: {

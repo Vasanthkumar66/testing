@@ -24,20 +24,16 @@ const EmployeePage = () => {
   const fullText =
     "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
   const [employees, setEmployees] = useState([]);
-
-  const handleEnrollEmployee = (employee) => {
-    // Update employees state and local storage
-    const updatedEmployees = [...employees, employee];
-    localStorage.setItem("employees", JSON.stringify(updatedEmployees));
-    setEmployees(updatedEmployees);
+  const [employeesChange, setEmployeeschange] = useState(false);
+  const onAddEmployee = () => {
+    setEmployeeschange(!employeesChange)
   };
 
+  const onRemoveEmployee = () => {
+    setEmployeeschange(!employeesChange)
+  };
   useEffect(() => {
     // Load employees from local storage on component mount
-    const existingEmployees =
-      JSON.parse(localStorage.getItem("employees")) || [];
-    setEmployees(existingEmployees);
-
     let currentIndex = 0;
     const typingInterval = setInterval(() => {
       if (currentIndex <= fullText.length) {
@@ -53,13 +49,32 @@ const EmployeePage = () => {
   }, [effVar]);
 
   useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await fetch("http://localhost:8057/employees/all");
+        if (response.ok) {
+          const data = await response.json();
+          setEmployees(data);
+        } else {
+          console.error("Failed to fetch employees");
+        }
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      }
+    };
+    fetchEmployees()
+    renderEmployeeHierarchy()
     const toggleInterval = setInterval(() => {
       setEffVar((prevEffVar) => !prevEffVar);
     }, 15000);
     return () => {
       clearInterval(toggleInterval);
     };
-  }, []);
+  }, [employeesChange]);
+  const renderEmployeeHierarchy = () => {
+    return <EmployeeHierarchy employees={employees} />;
+  };
+  
 
   return (
     <>
@@ -182,10 +197,14 @@ const EmployeePage = () => {
       <Container>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
-            <EmployeeForm onSubmit={handleEnrollEmployee} />
+            <EmployeeForm
+              onAddEmployee={onAddEmployee}
+              onRemoveEmployee={onRemoveEmployee}
+            />
           </Grid>
           <Grid item xs={12} sm={6} style={{ marginTop: "13px" }}>
-            <EmployeeHierarchy employees={employees} />
+            {/* <EmployeeHierarchy employees={employees} /> */}
+            {renderEmployeeHierarchy()}
           </Grid>
         </Grid>
       </Container>

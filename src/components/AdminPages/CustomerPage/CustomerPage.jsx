@@ -26,35 +26,7 @@ const CustomerPage = () => {
   const [effVar, setEffVar] = useState(true);
   const fullText =
     "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-  const products = JSON.parse(localStorage.getItem("items")) || [];
-
-  const calculateTotalCost = (user) => {
-    const boughtProductIds = user.boughtProducts || [];
-    const totalCost = boughtProductIds.reduce((acc, productId) => {
-      const product = products.find((p) => p.id === productId);
-      return acc + (product ? parseFloat(product.price) : 0);
-    }, 0);
-    return totalCost.toFixed(2);
-  };
-
-  const getBoughtProductNames = (user) => {
-    const boughtProductIds = user.boughtProducts || [];
-    const boughtProductNames = boughtProductIds.map((productId) => {
-      const product = products.find((p) => p.id === productId);
-      return product ? product.title : "Unknown Product";
-    });
-    return boughtProductNames.join(", ");
-  };
-
-  const getBoughtProductImages = (user) => {
-    const boughtProductIds = user.boughtProducts || [];
-    const boughtProductImages = boughtProductIds.map((productId) => {
-      const product = products.find((p) => p.id === productId);
-      return product ? product.images : [];
-    });
-    return boughtProductImages.flat().filter((image) => image.length > 0);
-  };
+  const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
     let currentIndex = 0;
@@ -78,6 +50,21 @@ const CustomerPage = () => {
     return () => {
       clearInterval(toggleInterval);
     };
+  }, []);
+
+  useEffect(() => {
+    // Fetch customer details from the /cart/customer-details endpoint or your API endpoint
+    fetch("http://localhost:8057/cart/customer-details") // Update with your API endpoint
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setCustomers(data);
+      })
+      .catch((error) => console.error("Error fetching customer details:", error));
   }, []);
 
   return (
@@ -203,21 +190,19 @@ const CustomerPage = () => {
           marginBottom: "5px",
           marginTop: "20px",
           textAlign: "center",
-          textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)", // Add a shadow here
+          textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
         }}
       >
         Customer Management
       </Typography>
       <div className="cst-centered-container">
         <div className="cst-product-card-container">
-          {users.map((user) => (
+          {customers.map((customer) => (
             <Card
+              key={customer.userId}
               className="cst-product-card"
               sx={{
-                background:
-                  "linear-gradient(to top, #eeeeee, #ebe6eb, #ecdde3, #eed5d5, #ebcec3, #ebcebb, #e8cfb4, #e2d0ae, #e8d4af, #edd8af, #f3ddb0, #f8e1b0)",
-                borderRadius: "8px",
-                boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                // Card styles
               }}
             >
               <CardContent className="cst-product-details">
@@ -229,7 +214,7 @@ const CustomerPage = () => {
                   sx={{ fontFamily: "sans-serif" }}
                 >
                   <strong>
-                    <u>{user.username}</u>
+                    <u>{customer.username}</u>
                   </strong>
                 </Typography>
                 <Typography
@@ -238,7 +223,7 @@ const CustomerPage = () => {
                   className="cst-product-description"
                 >
                   <em>Email: </em>
-                  {user.email}
+                  {customer.email}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -247,16 +232,16 @@ const CustomerPage = () => {
                 >
                   <div className="cst-product-rating">
                     <em>Bought Products: </em>
-                    {getBoughtProductNames(user).length >= 1 ? (
-                      getBoughtProductNames(user)
+                    {customer.cartItems.length >= 1 ? (
+                      customer.cartItems.map((cartItem) => cartItem.productName).join(", ")
                     ) : (
                       <div>No products to show</div>
                     )}
                   </div>
                   <div className="cst-product-small-card-container">
-                    {getBoughtProductImages(user).map((img, index) => (
+                    {customer.cartItems.map((cartItem, index) => (
                       <div className="cst-small-product-card" key={index}>
-                        <img src={img} alt={`Product ${index}`} />
+                        <img src={cartItem.image} alt={`Product ${index}`} />
                       </div>
                     ))}
                   </div>
@@ -268,12 +253,12 @@ const CustomerPage = () => {
                 >
                   <span className="price">
                     Total Cost of Products:{" "}
-                    <strong>₹{calculateTotalCost(user)}</strong>
+                    <strong>₹{customer.cartItems.reduce((total, cartItem) => total + cartItem.price, 0).toFixed(2)}</strong>
                   </span>
                 </Typography>
                 <div className="cst-product-rating">
                   <strong>
-                    Savings: ₹{calculateTotalCost(user) * (25 / 100).toFixed(2)}
+                    Savings: ₹{(customer.cartItems.reduce((total, cartItem) => total + cartItem.price, 0) * 0.25).toFixed(2)}
                   </strong>
                 </div>
               </CardContent>

@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { useEffect } from "react";
 import {
   TextField,
   Button,
@@ -14,12 +13,13 @@ import {
 } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import axios from "axios";
 import "./EmployeeForm.css";
 
-const EmployeeForm = ({ onSubmit }) => {
+const EmployeeForm = ({ onAddEmployee, onRemoveEmployee }) => {
   const [employee, setEmployee] = useState({
     name: "",
-    salary: "",
+    salary: 0,
     joinedDate: null,
     role: "",
     email: "",
@@ -28,10 +28,18 @@ const EmployeeForm = ({ onSubmit }) => {
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [employeeList, setEmployeeList] = useState([]);
 
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get("http://localhost:8057/employees/all");
+      setEmployeeList(response.data);
+      //console.log(response.data)
+    } catch (error) {
+      console.error("Failed to fetch employees:", error);
+    }
+  };
+
   useEffect(() => {
-    const existingEmployees =
-      JSON.parse(localStorage.getItem("employees")) || [];
-    setEmployeeList(existingEmployees);
+    fetchEmployees();
   }, []);
 
   const handleChange = (e) => {
@@ -43,31 +51,46 @@ const EmployeeForm = ({ onSubmit }) => {
     setEmployee({ ...employee, joinedDate: date });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const updatedEmployees = [...employeeList, employee];
-    localStorage.setItem("employees", JSON.stringify(updatedEmployees));
-    setEmployeeList(updatedEmployees);
-    setEmployee({
-      name: "",
-      salary: "",
-      joinedDate: null,
-      role: "",
-      email: "",
-      mobile: "",
-    });
-    toast.success("Employee enrolled successfully!");
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8057/employees",
+        employee
+      );
+      setEmployeeList([...employeeList, response.data]);
+      setEmployee({
+        name: "",
+        salary: 0,
+        joinedDate: null,
+        role: "",
+        email: "",
+        mobile: "",
+      });
+      toast.success("Employee enrolled successfully!");
+      onAddEmployee()
+    } catch (error) {
+      console.error("Failed to enroll employee:", error);
+      toast.error("Failed to enroll employee.");
+    }
   };
 
-  const handleRemoveEmployee = () => {
+  const handleRemoveEmployee = async () => {
     if (selectedEmployee) {
-      const updatedEmployees = employeeList.filter(
-        (emp) => emp.name !== selectedEmployee
-      );
-      localStorage.setItem("employees", JSON.stringify(updatedEmployees));
-      setEmployeeList(updatedEmployees);
-      setSelectedEmployee("");
-      toast.success("Employee removed successfully!");
+      try {
+        await axios.delete(
+          `http://localhost:8057/employees/${selectedEmployee}`
+        );
+        setEmployeeList(
+          employeeList.filter((emp) => emp.id !== selectedEmployee)
+        );
+        setSelectedEmployee("");
+        toast.success("Employee removed successfully!");
+        // Trigger a re-render by calling the onRemoveEmployee callback
+        onRemoveEmployee();
+      } catch (error) {
+        console.error("Failed to remove employee:", error);
+        toast.error("Failed to remove employee.");
+      }
     }
   };
 
@@ -91,7 +114,7 @@ const EmployeeForm = ({ onSubmit }) => {
       <Typography variant="h6" className="form-title">
         <strong>Enroll Employee</strong>
       </Typography>
-      <form onSubmit={handleSubmit}>
+      <form>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <TextField
@@ -124,23 +147,45 @@ const EmployeeForm = ({ onSubmit }) => {
                 onChange={handleDateChange}
                 fullWidth
                 required
-                renderInput={(params) => <TextField {...params} margin="normal" />}
+                renderInput={(params) => (
+                  <TextField {...params} margin="normal" />
+                )}
               />
             </LocalizationProvider>
           </Grid>
           <Grid item xs={12}>
-            <FormControl fullWidth required margin="normal">
-              <InputLabel htmlFor="role">Role</InputLabel>
-              <Select
-                label="Role"
-                name="role"
-                value={employee.role}
-                onChange={handleChange}
-              >
-                {/* Menu items */}
-              </Select>
-            </FormControl>
-          </Grid>
+  <FormControl fullWidth required margin="normal">
+    <InputLabel htmlFor="role">Role</InputLabel>
+    <Select
+      label="Role"
+      name="role"
+      value={employee.role}
+      onChange={handleChange}
+    >
+      <MenuItem value="Employee">Employee</MenuItem>
+      <MenuItem value="Manager">Manager</MenuItem>
+      <MenuItem value="Supervisor">Supervisor</MenuItem>
+      <MenuItem value="Cashier">Cashier</MenuItem>
+      <MenuItem value="Stock Clerk">Stock Clerk</MenuItem>
+      <MenuItem value="Customer Service Representative">Customer Service Representative</MenuItem>
+      <MenuItem value="Security Guard">Security Guard</MenuItem>
+      <MenuItem value="Janitor">Janitor</MenuItem>
+      <MenuItem value="Accountant">Accountant</MenuItem>
+      <MenuItem value="Human Resources Manager">Human Resources Manager</MenuItem>
+      <MenuItem value="Store Director">Store Director</MenuItem>
+      <MenuItem value="Assistant Manager">Assistant Manager</MenuItem>
+      <MenuItem value="Inventory Manager">Inventory Manager</MenuItem>
+      <MenuItem value="Purchasing Manager">Purchasing Manager</MenuItem>
+      <MenuItem value="Marketing Manager">Marketing Manager</MenuItem>
+      <MenuItem value="Store Planner">Store Planner</MenuItem>
+      <MenuItem value="Merchandising Manager">Merchandising Manager</MenuItem>
+      <MenuItem value="Loss Prevention Manager">Loss Prevention Manager</MenuItem>
+      <MenuItem value="Customer Experience Manager">Customer Experience Manager</MenuItem>
+      <MenuItem value="Regional Manager">Regional Manager</MenuItem>
+    </Select>
+  </FormControl>
+</Grid>
+
           <Grid item xs={12}>
             <TextField
               label="Email ID"
@@ -166,10 +211,11 @@ const EmployeeForm = ({ onSubmit }) => {
         </Grid>
         <div className="button-container">
           <Button
-            type="submit"
+            type="button"
             variant="contained"
-            color="inherit"
+            color="primary"
             className="emp-submit-button"
+            onClick={handleSubmit}
           >
             Enroll
           </Button>
@@ -193,25 +239,27 @@ const EmployeeForm = ({ onSubmit }) => {
           <InputLabel htmlFor="employee">Select Employee</InputLabel>
           <Select
             label="Select Employee"
-            name="employee"
-            onChange={(e) => setSelectedEmployee(e.target.value)}
             value={selectedEmployee}
+            onChange={(e) => setSelectedEmployee(e.target.value)}
           >
             <MenuItem value="">
               <em>None</em>
             </MenuItem>
             {employeeList.map((emp) => (
-              <MenuItem key={emp.name} value={emp.name}>
+              <MenuItem key={emp.id} value={emp.id}>
                 {emp.name}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
+
         <div className="button-container">
           <Button
+            type="button"
             variant="contained"
+            color="primary"
             className="emp-submit-button"
-            color="inherit"
+            // onClick={handleRemoveEmployee}
             onClick={handleRemoveEmployee}
           >
             Remove

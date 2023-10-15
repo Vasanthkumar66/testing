@@ -6,7 +6,7 @@
 
 .employee-card {
   width: 250px; /* Set a fixed width */
-  height: 100px; /* Set a fixed height */
+  height: max-content; /* Set a fixed height */
   background: linear-gradient(
     to top,
     #eeeeee,
@@ -37,8 +37,15 @@
   box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
 }
 
-.subordinates {
-  margin-left: 20px;
-  border-left: 2px solid #ccc;
-  padding-left: 20px;
+/* Add these styles to your CSS file */
+
+.role-group {
+  margin-bottom: 20px; /* Adjust this margin as needed */
+  display: flex;
+  flex-direction: column;
 }
+
+.role-group h5 {
+  margin-bottom: 10px; /* Adjust this margin as needed */
+}
+
