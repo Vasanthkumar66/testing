@@ -198,6 +198,7 @@ const EmployeePage = () => {
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
             <EmployeeForm
+            className="emp-form"
               onAddEmployee={onAddEmployee}
               onRemoveEmployee={onRemoveEmployee}
             />

@@ -84,11 +84,13 @@ const ProductCard = ({ product }) => {
     setCartQuantity(event.target.value);
   };
   const addToCart = (product) => {
+   //console.log(product)
     const cartItemDTO = {
       productId: product.id,
       quantity: cartQuantity,
       price: product.price
     };
+    //console.log(cartItemDTO)
     axios
       .post("http://localhost:8057/cart/add", cartItemDTO, {
         headers: {
@@ -466,7 +468,6 @@ const Products = () => {
   };
 
   const handleCartClick = () => {
-    //console.log(userData);
     navigate("/cart-page", { state: { userData } });
   };
 

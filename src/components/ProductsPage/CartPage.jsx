@@ -13,13 +13,19 @@ import ShopIcon from "@mui/icons-material/Shop";
 import CardContent from "@mui/material/CardContent";
 import emptycart from "../../Assets/empty-cart.png";
 import CardMedia from "@mui/material/CardMedia";
-import PurchaseForm from "./PurchaseForm";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import logo from "../HomePage/Headers/header.png";
 import Tooltip from "@mui/material/Tooltip";
 import Zoom from "@mui/material/Zoom";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import Footer from "../HomePage/Footers/Footer";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import CircularProgress from "@mui/material/CircularProgress";
+import "./CartPage.css";
 
 const ProductCard = ({ product, removeFromCart, quantity }) => {
   const { id, title, price, description, image } = product;
@@ -165,14 +171,6 @@ const generateStars = (rating) => {
 const CartPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  //console.log(location.state)
-  const [existingUser, setExistingUser] = useState({
-    name: "",
-    country: "",
-    email: "",
-    contact: "",
-  });
-  //console.log(existingUser)
   const [typedText, setTypedText] = useState("");
   const fullText =
     "\u00A0\u00A0\u00A0Your Grocery Delivery Partner . . . . . . . . . . ";
@@ -180,16 +178,6 @@ const CartPage = () => {
   const [effVar, setEffVar] = useState(true);
   const [cart, setCart] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedUser, setSelectedUser] = useState("");
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-    setUsers(storedUsers);
-  }, []);
-
   useEffect(() => {
     let currentIndex = 0;
     const typingInterval = setInterval(() => {
@@ -230,7 +218,6 @@ const CartPage = () => {
       .then((response) => response.json())
       .then((data) => {
         setCart(data);
-        //console.log(data)
       })
       .catch((error) => {
         console.error("Error fetching cart items:", error);
@@ -245,91 +232,104 @@ const CartPage = () => {
     );
     setTotalPrice(calculatedTotalPrice);
   }, [cart]);
+  const handleGroceryClick = () => {
+    const existingUser = location.state.userData;
+    navigate("/products", { state: { existingUser } });
+  };
 
-  const removeFromCart = (cartItemId) => {
-    const updatedCart = cart.filter((item) => item.cartItemId !== cartItemId);
+  const removeFromCart = (id) => {
+    const updatedCart = cart.filter((item) => item.cartItemId !== id);
     setCart(updatedCart);
-    fetch(`http://localhost:8057/cart/remove/${cartItemId}`, {
+    fetch(`http://localhost:8057/cart/remove/${id}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
       },
     })
-      .then((response) => {
+      .then(async (response) => {
         if (response.ok) {
-          return response.json();
+          return response.text();
         } else {
           throw new Error("Failed to remove item from cart.");
         }
       })
-      .then(() => {
-        toast.info(`Item removed from the cart 🙂`, {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
+      .then((data) => {
+        if (data === "Cart item removed successfully") {
+          toast.info(`Item removed from the cart 🙂`, {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+        } else {
+          toast.error(`${data}`, {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+        }
       })
       .catch((error) => {
         console.error("Error removing item from cart:", error);
       });
   };
 
-  const handleFormOpen = () => {
-    setShowForm(true);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const openCheckoutDialog = () => {
+    setOpenDialog(true);
   };
 
-  const handleUserSelect = (event) => {
-    setSelectedUser(event.target.value);
+  const handleConfirmCheckout = () => {
+    setOpenDialog(false);
+    setLoading(true);
+    setTimeout(() => {
+      handleCheckout();
+      setLoading(false);
+      toast.success("Thank you for your purchase!");
+    }, 2000);
   };
 
-  const handleProductSelect = (event) => {
-    const productId = parseInt(event.target.value);
-    if (event.target.checked) {
-      setSelectedProducts([...selectedProducts, productId]);
-    } else {
-      setSelectedProducts(selectedProducts.filter((id) => id !== productId));
+  const handleCheckout = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8057/invoice/new?a6=${totalPrice * 100}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.text();
+
+        if (result === "Work Done") {
+          console.log("Payment success:", result);
+        } else {
+          console.error("Error creating Razorpay invoice:", result);
+        }
+      } else {
+        console.error("Error creating Razorpay invoice:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error creating Razorpay invoice:", error);
     }
   };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const user = users.find((u) => u.email === selectedUser);
-
-    if (user) {
-      user.boughtProducts = user.boughtProducts || [];
-      user.boughtProducts.push(...selectedProducts);
-      localStorage.setItem("users", JSON.stringify(users));
-    }
-
-    setSelectedUser("");
-    setSelectedProducts([]);
-    setShowForm(false);
-
-    toast.success(`Products purchased successfully! 🛒`, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
-  };
-
-  const handleGroceryClick = () => {
-    const existingUser = location.state.userData;
-    //setExistingUser(existingUser);
-    navigate("/products", { state: { existingUser } });
-  };
-  
-  
 
   return (
     <div>
@@ -364,20 +364,20 @@ const CartPage = () => {
             >
               <span className="head-title">{typedText}</span>
             </Typography>
-              <Button
-                onClick={handleGroceryClick}
-                className="button"
-                sx={{
-                  color: "black",
-                  backgroundColor: "#eeb03d",
-                  marginLeft: "16px",
-                }}
-              >
-                <ShoppingCartIcon />
-                <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
-                  Go to Grocery
-                </Typography>
-              </Button>
+            <Button
+              onClick={handleGroceryClick}
+              className="button"
+              sx={{
+                color: "black",
+                backgroundColor: "#eeb03d",
+                marginLeft: "16px",
+              }}
+            >
+              <ShoppingCartIcon />
+              <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
+                Go to Grocery
+              </Typography>
+            </Button>
             {cart.length >= 1 ? (
               <Button
                 className="button"
@@ -386,7 +386,9 @@ const CartPage = () => {
                   backgroundColor: "#eeb03d",
                   marginLeft: "16px",
                 }}
-                onClick={() => setShowForm(!showForm)}
+                onClick={() => {
+                  openCheckoutDialog();
+                }}
               >
                 <ShopIcon sx={{ fontSize: "20px" }} />
                 <Typography variant="body2" sx={{ paddingLeft: "8px" }}>
@@ -424,72 +426,109 @@ const CartPage = () => {
           </Toolbar>
         </AppBar>
       </Box>
-      {cart.length >= 1 ? (
-        <Typography
-          variant="h4"
-          sx={{
-            fontFamily: "fantasy",
-            backgroundImage:
-              "linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
-            marginBottom: "5px",
-            marginTop: "20px",
-            textAlign: "center",
-            textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-          }}
-        >
-          Your Cart
-        </Typography>
+      {loading ? (
+        <div>
+          <div className="loading-animation">
+            <div className="loading-text">
+              <Typography variant="h6">Processing Your Checkout !!</Typography>
+            </div>
+            <br />
+            <CircularProgress style={{color:"white"}}/>
+          </div>
+          <div className="centered-container">
+            <div className="product-card-container">
+              {cart.map((item) => (
+                <ProductCard
+                  key={item.cartItemId}
+                  product={item.product}
+                  quantity={item.quantity}
+                  removeFromCart={() => removeFromCart(item.cartItemId)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       ) : (
-        <Typography
-          variant="h4"
-          sx={{
-            fontFamily: "fantasy",
-            backgroundImage:
-              "linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
-            marginBottom: "5px",
-            marginTop: "20px",
-            textAlign: "center",
-            textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-          }}
-        >
-          Your Cart is Empty
-        </Typography>
-      )}
-      <div className="centered-container">
-        <div className="product-card-container">
+        <>
           {cart.length >= 1 ? (
-            cart.map((item) => (
-              <ProductCard
-                key={item.cartItemId}
-                product={item.product}
-                quantity={item.quantity}
-                removeFromCart={removeFromCart}
-              />
-            ))
+            <div>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontFamily: "fantasy",
+                  backgroundImage:
+                    "linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)",
+                  WebkitBackgroundClip: "text",
+                  color: "transparent",
+                  marginBottom: "5px",
+                  marginTop: "20px",
+                  textAlign: "center",
+                  textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                Your Cart
+              </Typography>
+              <div className="centered-container">
+                <div className="product-card-container">
+                  {cart.map((item) => (
+                    <ProductCard
+                      key={item.cartItemId}
+                      product={item.product}
+                      quantity={item.quantity}
+                      removeFromCart={() => removeFromCart(item.cartItemId)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : (
-            <div className="mt-image">
-              <img src={emptycart} alt="Empty Cart" />
+            <div>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontFamily: "fantasy",
+                  backgroundImage:
+                    "linear-gradient(to left bottom, #eeb03d, #c2763f, #874839, #452527, #000000)",
+                  WebkitBackgroundClip: "text",
+                  color: "transparent",
+                  marginBottom: "5px",
+                  marginTop: "20px",
+                  textAlign: "center",
+                  textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                Your Cart is Empty
+              </Typography>
+              <div className="mt-image">
+                <img src={emptycart} alt="Empty Cart" />
+              </div>
             </div>
           )}
-        </div>
-        <div className="purchase-form">
-          {showForm && (
-            <PurchaseForm
-              selectedUser={selectedUser}
-              handleUserSelect={handleUserSelect}
-              cart={cart}
-              handleProductSelect={handleProductSelect}
-              handleSubmit={handleSubmit}
-              users={users}
-            />
-          )}
-        </div>
-      </div>
+        </>
+      )}
+
       <Footer />
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        aria-labelledby="checkout-dialog-title"
+        aria-describedby="checkout-dialog-description"
+      >
+        <DialogTitle id="checkout-dialog-title">Confirm Checkout</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="checkout-dialog-description">
+            Are you sure you want to proceed with the payment?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmCheckout} color="primary">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

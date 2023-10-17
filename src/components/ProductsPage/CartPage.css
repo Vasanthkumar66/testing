@@ -11,7 +11,7 @@
 .product-card-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: space-between; /* or flex-start based on your preference */
   gap: 16px;
   margin-top: 15px;
 }
@@ -136,4 +136,30 @@
   to {
     opacity: 0.7;
   }
+}
+
+.loading-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  color: white;
+  font-size: 30px;
+}
+
+.loading-text {
+  text-align: center;
+}
+
+
+/* Confirmation Dialog Styles */
+.dialog-paper {
+  max-width: 400px;
 }
